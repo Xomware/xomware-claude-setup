@@ -1,0 +1,155 @@
+#!/usr/bin/env bash
+# xom-update-claude-setup
+# Scans Xomware projects for .claude/ configs and surfaces what's unique per project
+# vs what's already global. Optionally promotes project-level configs to global.
+#
+# Read-only by default — only copies files when you explicitly say yes.
+
+set -euo pipefail
+
+REPO_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+GLOBAL_DIR="$REPO_DIR/global"
+CLAUDE_DIR="$HOME/.claude"
+SCAN_DIR="${XOM_CLAUDE_SETUP_SCAN_DIR:-$HOME/Code}"
+
+usage() {
+  echo "Usage: xom-update-claude-setup [options]"
+  echo ""
+  echo "Scans Xomware projects for .claude/ configs and surfaces improvements."
+  echo ""
+  echo "Options:"
+  echo "  --scan-dir DIR   Directory to scan (default: $SCAN_DIR)"
+  echo "  --promote        Interactively promote project configs to global"
+  echo "  --report         Print report only (default)"
+  echo "  --help           Show this help"
+}
+
+MODE="report"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --scan-dir) SCAN_DIR="$2"; shift 2 ;;
+    --promote) MODE="promote"; shift ;;
+    --report) MODE="report"; shift ;;
+    --help) usage; exit 0 ;;
+    *) echo "Unknown option: $1"; usage; exit 1 ;;
+  esac
+done
+
+# Check if a name exists in a directory
+is_global() {
+  local type="$1" name="$2"
+  [[ -f "$GLOBAL_DIR/$type/$name" ]]
+}
+
+echo "xom-update-claude-setup"
+echo "  Repo:     $REPO_DIR"
+echo "  Scanning: $SCAN_DIR"
+echo ""
+
+# Temp files for collecting findings
+FINDINGS_FILE="$(mktemp)"
+SUMMARY_FILE="$(mktemp)"
+trap 'rm -f "$FINDINGS_FILE" "$SUMMARY_FILE"' EXIT
+
+PROJECT_COUNT=0
+HAS_FINDINGS=false
+
+for project_dir in "$SCAN_DIR"/*/; do
+  [[ -d "$project_dir/.claude" ]] || continue
+  project_name="$(basename "$project_dir")"
+
+  # Skip this repo itself
+  [[ "$project_name" == "xomware-claude-setup" ]] && continue
+
+  PROJECT_COUNT=$((PROJECT_COUNT + 1))
+  project_findings=""
+
+  for type in agents skills commands; do
+    if [[ -d "$project_dir/.claude/$type" ]]; then
+      for f in "$project_dir"/.claude/"$type"/*.md; do
+        [[ -f "$f" ]] || continue
+        base="$(basename "$f")"
+        if ! is_global "$type" "$base"; then
+          TYPE_UPPER="$(echo "$type" | tr '[:lower:]' '[:upper:]' | sed 's/S$//')"
+          project_findings+="    $TYPE_UPPER: $base\n"
+          echo "$type|$base|$project_name" >> "$FINDINGS_FILE"
+        fi
+      done
+    fi
+  done
+
+  if [[ -n "$project_findings" ]]; then
+    HAS_FINDINGS=true
+    echo "  $project_name:"
+    echo -e "$project_findings"
+  fi
+done
+
+echo "---"
+echo "Scanned $PROJECT_COUNT Xomware projects with .claude/ configs."
+echo ""
+
+if [[ "$HAS_FINDINGS" == "false" ]]; then
+  echo "No unique project-level configs found. Global setup is up to date."
+  exit 0
+fi
+
+# Build deduplicated summary
+echo "=== Unique configs not in global ==="
+echo ""
+
+for type in agents skills commands; do
+  case "$type" in
+    agents)   TYPE_LABEL="Agents" ;;
+    skills)   TYPE_LABEL="Skills" ;;
+    commands) TYPE_LABEL="Commands" ;;
+  esac
+  names="$(grep "^$type|" "$FINDINGS_FILE" 2>/dev/null | cut -d'|' -f2 | sort -u || true)"
+  if [[ -n "$names" ]]; then
+    echo "$TYPE_LABEL:"
+    echo "$names" | while read -r name; do
+      all_projects="$(grep "^$type|$name|" "$FINDINGS_FILE" | cut -d'|' -f3 | sort -u | tr '\n' ' ')"
+      echo "  $name  (from: $all_projects)"
+    done
+    echo ""
+  fi
+done
+
+# Promote mode
+if [[ "$MODE" == "promote" ]]; then
+  echo "=== Promote to global ==="
+  echo ""
+
+  sort -t'|' -k1,2 -u "$FINDINGS_FILE" | while IFS='|' read -r type name first_project; do
+    src="$SCAN_DIR/$first_project/.claude/$type/$name"
+    dst="$GLOBAL_DIR/$type/$name"
+    live_dst="$CLAUDE_DIR/$type/$name"
+
+    if [[ ! -f "$src" ]]; then
+      echo "  Source not found: $src"
+      continue
+    fi
+
+    echo ""
+    echo "--- $type/$name (from $first_project) ---"
+    head -20 "$src"
+    echo "..."
+    echo ""
+    read -p "  Promote to global? [y/N] " -n 1 -r
+    echo ""
+
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      cp "$src" "$dst"
+      cp "$src" "$live_dst" 2>/dev/null || true
+      echo "  Promoted: $dst"
+    else
+      echo "  Skipped."
+    fi
+  done
+
+  echo ""
+  echo "Done. Run 'xom-install-claude-setup' to sync global dir to ~/.claude/"
+else
+  echo "Run with --promote to interactively copy these to global."
+fi

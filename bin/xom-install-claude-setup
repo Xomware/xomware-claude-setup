@@ -1,0 +1,135 @@
+#!/usr/bin/env bash
+# xom-install-claude-setup
+# Installs Xomware global Claude Code config from this repo to ~/.claude/
+# Safe by default — never overwrites existing files unless --force is passed.
+# With --force, creates timestamped backups before overwriting.
+
+set -euo pipefail
+
+REPO_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+SOURCE_DIR="$REPO_DIR/global"
+CLAUDE_DIR="$HOME/.claude"
+FORCE=false
+BACKUP_DIR="$CLAUDE_DIR/.backups/$(date +%Y%m%d-%H%M%S)"
+
+usage() {
+  echo "Usage: xom-install-claude-setup [--force]"
+  echo ""
+  echo "Installs Xomware global Claude Code config to ~/.claude/"
+  echo ""
+  echo "Options:"
+  echo "  --force    Overwrite existing files (creates backups first)"
+  echo "  --dry-run  Show what would be done without doing it"
+  echo "  --help     Show this help"
+}
+
+DRY_RUN=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --force) FORCE=true; shift ;;
+    --dry-run) DRY_RUN=true; shift ;;
+    --help) usage; exit 0 ;;
+    *) echo "Unknown option: $1"; usage; exit 1 ;;
+  esac
+done
+
+log() { echo "  $1"; }
+
+backup_file() {
+  local file="$1"
+  if [[ -f "$file" ]]; then
+    local rel="${file#$CLAUDE_DIR/}"
+    local backup_path="$BACKUP_DIR/$rel"
+    mkdir -p "$(dirname "$backup_path")"
+    cp "$file" "$backup_path"
+  fi
+}
+
+copy_file() {
+  local src="$1"
+  local dst="$2"
+
+  if [[ "$DRY_RUN" == "true" ]]; then
+    if [[ -f "$dst" ]] && [[ "$FORCE" == "false" ]]; then
+      log "SKIP (exists): $dst"
+    elif [[ -f "$dst" ]]; then
+      log "WOULD OVERWRITE (backup + copy): $dst"
+    else
+      log "WOULD CREATE: $dst"
+    fi
+    return
+  fi
+
+  if [[ -f "$dst" ]] && [[ "$FORCE" == "false" ]]; then
+    log "SKIP (exists): $dst"
+  elif [[ -f "$dst" ]]; then
+    backup_file "$dst"
+    cp "$src" "$dst"
+    log "UPDATED (backed up): $dst"
+  else
+    mkdir -p "$(dirname "$dst")"
+    cp "$src" "$dst"
+    log "CREATED: $dst"
+  fi
+}
+
+echo "xom-install-claude-setup"
+echo "  Source: $SOURCE_DIR"
+echo "  Target: $CLAUDE_DIR"
+[[ "$FORCE" == "true" ]] && echo "  Mode: FORCE (backups to $BACKUP_DIR)"
+[[ "$DRY_RUN" == "true" ]] && echo "  Mode: DRY RUN"
+echo ""
+
+# Check hook runtimes
+if [[ -f "$SOURCE_DIR/hooks/check-runtime.sh" ]] && [[ "$DRY_RUN" == "false" ]]; then
+  bash "$SOURCE_DIR/hooks/check-runtime.sh" 2>/dev/null || true
+fi
+
+# Create directories
+if [[ "$DRY_RUN" == "false" ]]; then
+  mkdir -p "$CLAUDE_DIR"/{agents,skills,commands,output-styles,hooks}
+fi
+
+# CLAUDE.md
+copy_file "$SOURCE_DIR/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
+
+# settings.json
+if [[ -f "$CLAUDE_DIR/settings.json" ]] && [[ "$FORCE" == "false" ]]; then
+  log "SKIP (exists): $CLAUDE_DIR/settings.json — merge manually if needed"
+else
+  copy_file "$SOURCE_DIR/settings.json" "$CLAUDE_DIR/settings.json"
+fi
+
+# Agents
+for f in "$SOURCE_DIR"/agents/*.md; do
+  [[ -f "$f" ]] || continue
+  copy_file "$f" "$CLAUDE_DIR/agents/$(basename "$f")"
+done
+
+# Skills
+for f in "$SOURCE_DIR"/skills/*.md; do
+  [[ -f "$f" ]] || continue
+  copy_file "$f" "$CLAUDE_DIR/skills/$(basename "$f")"
+done
+
+# Commands
+for f in "$SOURCE_DIR"/commands/*.md; do
+  [[ -f "$f" ]] || continue
+  copy_file "$f" "$CLAUDE_DIR/commands/$(basename "$f")"
+done
+
+# Hooks
+for f in "$SOURCE_DIR"/hooks/*.js; do
+  [[ -f "$f" ]] || continue
+  copy_file "$f" "$CLAUDE_DIR/hooks/$(basename "$f")"
+  [[ "$DRY_RUN" == "false" ]] && chmod +x "$CLAUDE_DIR/hooks/$(basename "$f")"
+done
+
+echo ""
+if [[ "$DRY_RUN" == "true" ]]; then
+  echo "Dry run complete. No files were changed."
+else
+  echo "Xomware global config installed to $CLAUDE_DIR"
+  [[ "$FORCE" == "true" ]] && echo "Backups saved to $BACKUP_DIR"
+fi

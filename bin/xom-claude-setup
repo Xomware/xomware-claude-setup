@@ -1,0 +1,180 @@
+#!/usr/bin/env bash
+# xom-claude-setup
+# Interactive manager for Xomware Claude Code configuration.
+# Run with no args for interactive mode, or pass a subcommand directly.
+
+set -euo pipefail
+
+REPO_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+
+BOLD="\033[1m"
+DIM="\033[2m"
+CYAN="\033[36m"
+GREEN="\033[32m"
+YELLOW="\033[33m"
+RESET="\033[0m"
+
+show_reference() {
+  echo ""
+  echo -e "${BOLD}${CYAN}Slash Commands${RESET} ${DIM}(run inside a Claude Code session)${RESET}"
+  echo ""
+  echo -e "  ${BOLD}Workflow${RESET}"
+  echo -e "  ${GREEN}/work-issue [#]${RESET}               Full dev cycle: issue → analyze → code → commit → board"
+  echo -e "  ${GREEN}/fix [desc]${RESET}                   Quick fix — implement, test, review in one shot"
+  echo -e "  ${GREEN}/research [topic]${RESET}             Tech investigation → RESEARCH.md"
+  echo -e "  ${GREEN}/brainstorm [topic]${RESET}           Explore options → BRAINSTORM.md"
+  echo -e "  ${GREEN}/plan [topic]${RESET}                 Write implementation plan → PLAN.md"
+  echo -e "  ${GREEN}/execute [feature]${RESET}            Run a plan with delegation preview"
+  echo -e "  ${GREEN}/orchestrate [epic]${RESET}           Break epic into feature sub-plans"
+  echo ""
+  echo -e "  ${BOLD}Review & Ship${RESET}"
+  echo -e "  ${GREEN}/review${RESET}                       Review + auto-fix changed code"
+  echo -e "  ${GREEN}/test${RESET}                         Run tests, diagnose + fix failures"
+  echo -e "  ${GREEN}/commit${RESET}                       Stage + commit with structured message"
+  echo -e "  ${GREEN}/pr${RESET}                           Prepare pull request description"
+  echo ""
+  echo -e "  ${BOLD}Project Management${RESET}"
+  echo -e "  ${GREEN}/board${RESET}                        View XomBoard (GitHub Projects)"
+  echo -e "  ${GREEN}/backlog [desc]${RESET}               Create GitHub issue + add to XomBoard + branch"
+  echo ""
+  echo -e "  ${BOLD}Config & Memory${RESET}"
+  echo -e "  ${GREEN}/setup${RESET}                        Interactive project setup"
+  echo -e "  ${GREEN}/audit-config${RESET}                 Health check — CLAUDE.md size, stale content"
+  echo -e "  ${GREEN}/catchup${RESET}                      Resume context from last session"
+  echo -e "  ${GREEN}/end-session${RESET}                  Log session, clear dirty-files"
+  echo -e "  ${GREEN}/compound [pattern]${RESET}           Capture reusable pattern → docs/solutions/"
+  echo ""
+  echo -e "  ${BOLD}Domain Specialists${RESET} ${DIM}(invoked by /work-issue or directly)${RESET}"
+  echo -e "  ${GREEN}frontend-specialist${RESET}           Angular/React/Next.js/Tailwind"
+  echo -e "  ${GREEN}backend-specialist${RESET}            Python/TS/Elixir APIs"
+  echo -e "  ${GREEN}infra-specialist${RESET}              Terraform/AWS/CI-CD"
+  echo -e "  ${GREEN}ios-specialist${RESET}                Swift/SwiftUI/Xcode"
+  echo ""
+}
+
+show_status() {
+  echo ""
+  echo -e "${BOLD}${CYAN}Current Status${RESET}"
+  echo ""
+
+  # Global config
+  if [[ -d "$HOME/.claude/skills" ]]; then
+    skill_count=$(find "$HOME/.claude/skills" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+    agent_count=$(find "$HOME/.claude/agents" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+    cmd_count=$(find "$HOME/.claude/commands" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+    echo -e "  ${GREEN}Global config:${RESET}  $skill_count skills, $agent_count agents, $cmd_count commands"
+  else
+    echo -e "  ${YELLOW}Global config:${RESET}  Not installed. Run: xom-claude-setup install"
+  fi
+
+  # Current project
+  if [[ -f ".claude/CLAUDE.md" ]]; then
+    echo -e "  ${GREEN}Current project:${RESET} .claude/CLAUDE.md found"
+    if [[ -f ".claude/rules/org.md" ]]; then
+      org_name="$(grep -m1 '^# ' .claude/rules/org.md 2>/dev/null | sed 's/^# Org Conventions.*— //' || echo "configured")"
+      echo -e "  ${GREEN}Org rules:${RESET}      $org_name"
+    else
+      echo -e "  ${YELLOW}Org rules:${RESET}      Not set. Run: xom-init-claude-setup"
+    fi
+    rule_count=$(find .claude/rules -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+    echo -e "  ${GREEN}Path rules:${RESET}     $rule_count files"
+  else
+    echo -e "  ${YELLOW}Current project:${RESET} Not initialized. Run: xom-claude-setup init"
+  fi
+  echo ""
+}
+
+interactive_menu() {
+  echo ""
+  echo -e "${BOLD}Xomware Claude Code Setup${RESET}"
+  echo -e "${DIM}$REPO_DIR${RESET}"
+
+  show_status
+
+  echo -e "${BOLD}What do you want to do?${RESET}"
+  echo ""
+  echo -e "  ${GREEN}1${RESET}  Install global config            ${DIM}(skills, agents, commands → ~/.claude/)${RESET}"
+  echo -e "  ${GREEN}2${RESET}  Init new project                 ${DIM}(first-time scaffold .claude/ + docs/)${RESET}"
+  echo -e "  ${GREEN}3${RESET}  Update existing project          ${DIM}(pull latest templates, backs up first)${RESET}"
+  echo -e "  ${GREEN}4${RESET}  Scan projects for promotions     ${DIM}(find unique project configs to promote)${RESET}"
+  echo -e "  ${GREEN}5${RESET}  Show slash command reference      ${DIM}(all commands available in Claude sessions)${RESET}"
+  echo -e "  ${GREEN}q${RESET}  Quit"
+  echo ""
+  read -rp "  > " choice
+
+  case "$choice" in
+    1)
+      echo ""
+      read -rp "  Force overwrite? (backs up first) [y/N] " force
+      if [[ "$force" =~ ^[Yy]$ ]]; then
+        exec "$REPO_DIR/bin/xom-install-claude-setup" --force
+      else
+        exec "$REPO_DIR/bin/xom-install-claude-setup"
+      fi
+      ;;
+    2)
+      echo ""
+      if [[ -f ".claude/CLAUDE.md" ]]; then
+        echo -e "  ${YELLOW}Project already initialized.${RESET} Use option 3 to update."
+      else
+        exec "$REPO_DIR/bin/xom-init-claude-setup"
+      fi
+      ;;
+    3)
+      echo ""
+      if [[ ! -f ".claude/CLAUDE.md" ]]; then
+        echo -e "  ${YELLOW}Project not initialized yet.${RESET} Use option 2 first."
+      else
+        echo -e "  Updating project templates (backs up existing, never touches CLAUDE.md)..."
+        echo ""
+        exec "$REPO_DIR/bin/xom-init-claude-setup" --force
+      fi
+      ;;
+    4)
+      echo ""
+      exec "$REPO_DIR/bin/xom-update-claude-setup" --report
+      ;;
+    5)
+      show_reference
+      ;;
+    q|Q|"")
+      exit 0
+      ;;
+    *)
+      echo "  Invalid choice."
+      exit 1
+      ;;
+  esac
+}
+
+# Direct subcommand mode
+case "${1:-}" in
+  install)
+    shift
+    exec "$REPO_DIR/bin/xom-install-claude-setup" "$@"
+    ;;
+  init)
+    shift
+    exec "$REPO_DIR/bin/xom-init-claude-setup" "$@"
+    ;;
+  update-project)
+    shift
+    exec "$REPO_DIR/bin/xom-init-claude-setup" --force "$@"
+    ;;
+  scan)
+    shift
+    exec "$REPO_DIR/bin/xom-update-claude-setup" "$@"
+    ;;
+  help|--help|-h)
+    show_reference
+    show_status
+    ;;
+  "")
+    interactive_menu
+    ;;
+  *)
+    echo "Unknown command: $1"
+    echo "Run 'xom-claude-setup' with no arguments for interactive mode."
+    exit 1
+    ;;
+esac

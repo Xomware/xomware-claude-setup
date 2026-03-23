@@ -1,0 +1,7 @@
+# Claude Code local settings (personal, not shared)
+.claude/settings.local.json
+.claude/memory/
+.claude/.backups/
+
+# OS
+.DS_Store

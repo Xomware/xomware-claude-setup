@@ -1,0 +1,253 @@
+#!/usr/bin/env bash
+# xom-init-claude-setup
+# Scaffolds .claude/ and docs/ in the current Xomware project directory.
+# Run from your project root.
+# Safe by default — never overwrites existing files.
+# Auto-migrates old structure (docs/plans/, docs/spikes/) to docs/features/.
+
+set -euo pipefail
+
+REPO_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+TEMPLATE_DIR="$REPO_DIR/project-template"
+PROJECT_DIR="$(pwd)"
+PROJECT_NAME="$(basename "$PROJECT_DIR")"
+
+usage() {
+  echo "Usage: xom-init-claude-setup [--force] [--migrate-only]"
+  echo ""
+  echo "Scaffolds .claude/ and docs/ for Claude Code in the current Xomware project."
+  echo ""
+  echo "Options:"
+  echo "  --force         Overwrite existing files (creates backups first)"
+  echo "  --migrate-only  Only run migration from old structure, don't scaffold"
+  echo "  --dry-run       Show what would be done without doing it"
+  echo "  --help          Show this help"
+}
+
+FORCE=false
+DRY_RUN=false
+MIGRATE_ONLY=false
+BACKUP_DIR="$PROJECT_DIR/.claude/.backups/$(date +%Y%m%d-%H%M%S)"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --force) FORCE=true; shift ;;
+    --dry-run) DRY_RUN=true; shift ;;
+    --migrate-only) MIGRATE_ONLY=true; shift ;;
+    --help) usage; exit 0 ;;
+    *) echo "Unknown option: $1"; usage; exit 1 ;;
+  esac
+done
+
+log() { echo "  $1"; }
+
+backup_file() {
+  local file="$1"
+  if [[ -f "$file" ]]; then
+    local rel="${file#$PROJECT_DIR/}"
+    local backup_path="$BACKUP_DIR/$rel"
+    mkdir -p "$(dirname "$backup_path")"
+    cp "$file" "$backup_path"
+  fi
+}
+
+copy_if_missing() {
+  local src="$1"
+  local dst="$2"
+
+  if [[ "$DRY_RUN" == "true" ]]; then
+    if [[ -f "$dst" ]] && [[ "$FORCE" == "false" ]]; then
+      log "SKIP (exists): $dst"
+    elif [[ -f "$dst" ]]; then
+      log "WOULD OVERWRITE (backup + copy): $dst"
+    else
+      log "WOULD CREATE: $dst"
+    fi
+    return
+  fi
+
+  if [[ -f "$dst" ]] && [[ "$FORCE" == "false" ]]; then
+    log "SKIP (exists): $dst"
+  elif [[ -f "$dst" ]]; then
+    backup_file "$dst"
+    cp "$src" "$dst"
+    log "UPDATED (backed up): $dst"
+  else
+    mkdir -p "$(dirname "$dst")"
+    cp "$src" "$dst"
+    log "CREATED: $dst"
+  fi
+}
+
+# --- Migration: docs/plans/ + docs/spikes/ → docs/features/ ---
+migrate_old_structure() {
+  local migrated=0
+
+  if [[ -d "$PROJECT_DIR/docs/plans" ]]; then
+    for plan_file in "$PROJECT_DIR"/docs/plans/*.md; do
+      [[ -f "$plan_file" ]] || continue
+      local basename_no_ext
+      basename_no_ext="$(basename "$plan_file" .md)"
+
+      if [[ "$basename_no_ext" == *-brainstorm ]]; then
+        local feature_name="${basename_no_ext%-brainstorm}"
+        local target_dir="$PROJECT_DIR/docs/features/$feature_name"
+        local target_file="$target_dir/BRAINSTORM.md"
+      else
+        local feature_name="$basename_no_ext"
+        local target_dir="$PROJECT_DIR/docs/features/$feature_name"
+        local target_file="$target_dir/PLAN.md"
+      fi
+
+      if [[ "$DRY_RUN" == "true" ]]; then
+        log "WOULD MIGRATE: $plan_file → $target_file"
+      else
+        mkdir -p "$target_dir"
+        if [[ ! -f "$target_file" ]]; then
+          mv "$plan_file" "$target_file"
+          log "MIGRATED: $plan_file → $target_file"
+          migrated=$((migrated + 1))
+        else
+          log "SKIP (target exists): $target_file"
+        fi
+      fi
+    done
+  fi
+
+  if [[ -d "$PROJECT_DIR/docs/spikes" ]]; then
+    for spike_file in "$PROJECT_DIR"/docs/spikes/*.md; do
+      [[ -f "$spike_file" ]] || continue
+      local basename_no_ext
+      basename_no_ext="$(basename "$spike_file" .md)"
+      local target_dir="$PROJECT_DIR/docs/features/$basename_no_ext"
+      local target_file="$target_dir/RESEARCH.md"
+
+      if [[ "$DRY_RUN" == "true" ]]; then
+        log "WOULD MIGRATE: $spike_file → $target_file"
+      else
+        mkdir -p "$target_dir"
+        if [[ ! -f "$target_file" ]]; then
+          mv "$spike_file" "$target_file"
+          log "MIGRATED: $spike_file → $target_file"
+          migrated=$((migrated + 1))
+        else
+          log "SKIP (target exists): $target_file"
+        fi
+      fi
+    done
+  fi
+
+  if [[ "$DRY_RUN" == "false" ]]; then
+    for old_dir in "$PROJECT_DIR/docs/plans" "$PROJECT_DIR/docs/spikes"; do
+      if [[ -d "$old_dir" ]] && [[ -z "$(ls -A "$old_dir" 2>/dev/null)" ]]; then
+        rmdir "$old_dir"
+        log "REMOVED empty dir: $old_dir"
+      fi
+    done
+  fi
+
+  if [[ "$migrated" -gt 0 ]]; then
+    log ""
+    log "Migrated $migrated files to docs/features/"
+  fi
+}
+
+echo "xom-init-claude-setup"
+echo "  Project: $PROJECT_NAME"
+echo "  Target:  $PROJECT_DIR"
+[[ "$FORCE" == "true" ]] && echo "  Mode: FORCE (backups to $BACKUP_DIR)"
+[[ "$DRY_RUN" == "true" ]] && echo "  Mode: DRY RUN"
+[[ "$MIGRATE_ONLY" == "true" ]] && echo "  Mode: MIGRATE ONLY"
+echo ""
+
+# Run migration first (always, if old structure exists)
+if [[ -d "$PROJECT_DIR/docs/plans" ]] || [[ -d "$PROJECT_DIR/docs/spikes" ]]; then
+  echo "Migrating old structure..."
+  migrate_old_structure
+  echo ""
+fi
+
+if [[ "$MIGRATE_ONLY" == "true" ]]; then
+  if [[ "$DRY_RUN" == "true" ]]; then
+    echo "Dry run complete. No files were changed."
+  else
+    echo "Migration complete."
+  fi
+  exit 0
+fi
+
+# Create dirs
+if [[ "$DRY_RUN" == "false" ]]; then
+  mkdir -p "$PROJECT_DIR"/.claude/{agents,skills,commands,rules,memory}
+  mkdir -p "$PROJECT_DIR"/docs/{workflows,features,solutions,reference}
+fi
+
+# Copy template files
+if [[ -f "$PROJECT_DIR/.claude/CLAUDE.md" ]]; then
+  log "SKIP (protected): .claude/CLAUDE.md — always project-customized, never overwritten"
+else
+  copy_if_missing "$TEMPLATE_DIR/.claude/CLAUDE.md"            "$PROJECT_DIR/.claude/CLAUDE.md"
+fi
+copy_if_missing "$TEMPLATE_DIR/.claude/settings.json"          "$PROJECT_DIR/.claude/settings.json"
+copy_if_missing "$TEMPLATE_DIR/.claude/memory/session-log.md"  "$PROJECT_DIR/.claude/memory/session-log.md"
+copy_if_missing "$TEMPLATE_DIR/docs/architecture.md"           "$PROJECT_DIR/docs/architecture.md"
+
+# Copy workflow docs
+for f in "$TEMPLATE_DIR"/docs/workflows/*.md; do
+  [[ -f "$f" ]] || continue
+  copy_if_missing "$f" "$PROJECT_DIR/docs/workflows/$(basename "$f")"
+done
+
+# Copy reference docs
+for f in "$TEMPLATE_DIR"/docs/reference/*.md; do
+  [[ -f "$f" ]] || continue
+  copy_if_missing "$f" "$PROJECT_DIR/docs/reference/$(basename "$f")"
+done
+
+# Copy path-scoped rules
+for f in "$TEMPLATE_DIR"/.claude/rules/*.md; do
+  [[ -f "$f" ]] || continue
+  copy_if_missing "$f" "$PROJECT_DIR/.claude/rules/$(basename "$f")"
+done
+
+# Copy GitHub workflows
+if [[ -d "$TEMPLATE_DIR/.github/workflows" ]]; then
+  for f in "$TEMPLATE_DIR"/.github/workflows/*.yml; do
+    [[ -f "$f" ]] || continue
+    copy_if_missing "$f" "$PROJECT_DIR/.github/workflows/$(basename "$f")"
+  done
+fi
+
+# Add .claude/memory and .claude/.backups to .gitignore
+GITIGNORE="$PROJECT_DIR/.gitignore"
+if [[ "$DRY_RUN" == "false" ]]; then
+  if [[ -f "$GITIGNORE" ]]; then
+    ADDITIONS=""
+    if ! grep -q ".claude/memory" "$GITIGNORE" 2>/dev/null; then
+      ADDITIONS+="\n# Claude Code session memory (personal, not shared)\n.claude/memory/"
+    fi
+    if ! grep -q ".claude/.backups" "$GITIGNORE" 2>/dev/null; then
+      ADDITIONS+="\n# Claude setup backups\n.claude/.backups/"
+    fi
+    if ! grep -q "CLAUDE.local.md" "$GITIGNORE" 2>/dev/null; then
+      ADDITIONS+="\n# Personal Claude overrides (not shared)\nCLAUDE.local.md\n.claude/settings.local.json"
+    fi
+    if [[ -n "$ADDITIONS" ]]; then
+      echo -e "$ADDITIONS" >> "$GITIGNORE"
+      log "Updated .gitignore"
+    fi
+  fi
+fi
+
+echo ""
+if [[ "$DRY_RUN" == "true" ]]; then
+  echo "Dry run complete. No files were changed."
+else
+  echo "Xomware project initialized."
+  echo ""
+  echo "Next:"
+  echo "  1. Edit .claude/CLAUDE.md — fill in stack, commands, key paths"
+  echo "  2. Edit docs/architecture.md — document the system design"
+  echo "  3. Run Claude Code: claude"
+  echo "  4. Type /catchup to load context"
+fi
