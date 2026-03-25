@@ -1,9 +1,14 @@
 ---
 name: error-handling
-description: Use when designing error handling for any service, API, or module. Covers typed errors, result patterns, and error propagation across TypeScript, Python, and Elixir.
+description: >
+  ALWAYS use when designing error handling, result types, or error propagation. Covers
+  typed errors, Result patterns, and error boundaries across TypeScript and Python.
+  Also triggers for: custom error classes, error codes, HTTP error responses.
+  Trigger phrases: "error handling", "result type", "AppError", "try/catch",
+  "error propagation", "typed errors", "error boundary".
 ---
 
-# Error Handling Patterns — Areté
+# Error Handling Patterns — Xomware
 
 ## Core Principle
 **Errors are data, not exceptions.** Expected failures (not found, invalid input, rate limited) should be returned as values. Exceptions should be reserved for truly unexpected states.
@@ -93,49 +98,6 @@ class Err(Generic[T]):
     def is_ok(self) -> bool: return False
 
 Result = Ok[T] | Err[AppError]
-```
-
----
-
-## Elixir
-
-```elixir
-# Tagged tuples — the Elixir way
-defmodule MyApp.Error do
-  @type t :: %__MODULE__{
-    code: atom(),
-    message: String.t(),
-    context: map()
-  }
-
-  defstruct [:code, :message, context: %{}]
-
-  def not_found(resource, id),
-    do: %__MODULE__{code: :not_found, message: "#{resource} #{id} not found",
-                    context: %{resource: resource, id: id}}
-
-  def validation(message, fields \\ %{}),
-    do: %__MODULE__{code: :validation_error, message: message,
-                    context: %{fields: fields}}
-end
-
-# Usage in functions
-def get_user(id) do
-  case Repo.get(User, id) do
-    nil -> {:error, Error.not_found("User", id)}
-    user -> {:ok, user}
-  end
-end
-
-# Propagation with `with`
-def process(user_id, attrs) do
-  with {:ok, user} <- get_user(user_id),
-       {:ok, validated} <- validate(attrs),
-       {:ok, updated} <- update(user, validated) do
-    {:ok, updated}
-  end
-  # Any {:error, _} short-circuits and bubbles up
-end
 ```
 
 ---

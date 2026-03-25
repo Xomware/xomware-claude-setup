@@ -56,6 +56,17 @@ Rules:
 - Use `/compound` to capture patterns worth preserving across sessions
 - Always run `/end-session` before closing
 
+## Pipeline Discipline — No Shortcuts
+
+| Rationalization | Why It's Wrong | Do This Instead |
+|----------------|---------------|-----------------|
+| "This is a small change" | Small changes cause the most drift | Short spec is fine — still write one |
+| "I need more context first" | Exploring without a plan causes drift | Plan first, explore within it |
+| "Let me just try something" | Throwaway code becomes production | Spec → Plan → Code. Always. |
+| "The tests can come after" | They never do | RED before GREEN |
+| "I understand the requirements" | You understand your assumptions | Write them down, confirm |
+| "This is obvious, skip docs" | Obvious to you now, opaque to next session | Document it |
+
 ## Reference Docs
 - `@docs/reference/commands.md` — what each command does and when to use it
 - `@docs/reference/agents.md` — what each agent does and how they're invoked

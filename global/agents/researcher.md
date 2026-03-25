@@ -45,7 +45,7 @@ Create the feature directory if it doesn't exist, then save to `docs/features/[k
 [What it is, how it works, relevant constraints]
 - Pros: ...
 - Cons: ...
-- Areté fit: [how well it fits our stack and patterns]
+- Xomware fit: [how well it fits our stack and patterns]
 
 ### Option B: [name]
 [same structure]

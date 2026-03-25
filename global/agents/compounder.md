@@ -57,11 +57,10 @@ Use these standard categories (create new ones only when nothing fits):
 - `auth` — Authentication, authorization, SSO, tokens
 - `api` — API design, endpoints, clients, Graph API, webhooks
 - `database` — Queries, migrations, schemas, performance
-- `deployment` — Docker, Traefik, CI/CD, health checks
+- `deployment` — Docker, AWS, CI/CD, health checks
 - `config` — Environment, secrets, settings
 - `testing` — Test patterns, mocking, fixtures
 - `ui` — Components, styling, accessibility
-- `elixir` — Elixir/Phoenix/Ash-specific patterns
 - `python` — Python/FastAPI/pydantic-specific patterns
 - `typescript` — TypeScript/React/Node-specific patterns
 - `terraform` — IaC, provider patterns

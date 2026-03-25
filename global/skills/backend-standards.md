@@ -1,10 +1,11 @@
 ---
 name: backend-standards
 description: >
-  Use when doing any backend work -- APIs, services, databases, auth,
-  background jobs, CLI tools. Covers backend conventions for Python,
-  TypeScript, and Elixir. Load alongside language-specific skills (python,
-  elixir, phoenix) for implementation patterns.
+  ALWAYS use when doing any backend work — APIs, services, databases, auth,
+  background jobs, CLI tools, or server-side logic. Covers backend conventions
+  for Python and TypeScript. Load alongside language-specific skills.
+  Trigger phrases: "api", "endpoint", "service", "backend", "auth", "middleware",
+  "background job", "queue", "CLI tool", "server".
 ---
 
 # Backend Standards
@@ -28,7 +29,7 @@ description: >
 - RESTful by default. GraphQL only if explicitly justified.
 - Versioned from day one: `/api/v1/`
 - Response shape: `{ data, error, meta }` -- consistent everywhere
-- Validate at the boundary: Pydantic (Python), Zod (TypeScript), Ecto changesets (Elixir)
+- Validate at the boundary: Pydantic (Python), Zod (TypeScript)
 - All endpoints: auth check + input validation + error handling
 - Error shape: `{ error: string, code: string, details?: any }`
 - Never expose stack traces in responses
@@ -50,12 +51,6 @@ description: >
 - `zod` for runtime validation of all external data
 - Async/await -- no raw Promise chains
 - Typed errors -- no silent catches
-
-**Elixir/Phoenix**
-- Pattern match aggressively
-- `with` chains for multi-step operations with early exits
-- Contexts as domain boundaries -- no cross-context direct calls
-- Ecto changesets for all data validation -- never in controllers
 
 ## Error Handling
 
@@ -81,6 +76,5 @@ Before marking backend work done:
 
 - Hardcoding secrets or AWS region (always use variable/config)
 - Using `.env` in production containers
-- Writing Elixir like OOP -- embrace processes and pattern matching
 - Silent error swallowing in catch blocks
 - Missing pagination on list endpoints

@@ -1,14 +1,17 @@
 ---
 name: env-config
-description: Use when setting up environment variable management, config loading, or multi-environment configuration for any Areté service.
+description: >
+  ALWAYS use when setting up environment variables, config loading, secrets injection,
+  or multi-environment configuration. Also triggers for: .env files, config validation,
+  runtime config, config schemas, or environment-specific behavior.
+  Trigger phrases: "env", "environment variable", "config", ".env", "dotenv",
+  "runtime config", "settings", "secrets", "ssm", "secrets manager".
 ---
 
-# Environment & Config Patterns — Areté
+# Environment & Config Patterns — Xomware
 
 ## The Rule
-**Secrets live in Infisical. Config structure lives in code. Never in committed files.**
-
-See `infisical` skill for secret fetch patterns.
+**Secrets live in AWS (SSM Parameter Store or Secrets Manager). Config structure lives in code. Never in committed files.**
 
 ---
 
@@ -21,7 +24,7 @@ import { z } from "zod";
 const ConfigSchema = z.object({
   NODE_ENV: z.enum(["development", "staging", "production"]).default("development"),
   PORT: z.coerce.number().default(3000),
-  DATABASE_URL: z.string().url(),
+  DATABASE_URL: z.string().min(1),
   ANTHROPIC_API_KEY: z.string().min(1),
   // Optional with defaults
   LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
@@ -72,24 +75,30 @@ config = Config()
 
 ---
 
-## Elixir
+## AWS Secrets — SSM Parameter Store
 
-```elixir
-# config/runtime.exs — for runtime config (secrets, env-specific values)
-import Config
+```bash
+# Store a secret
+aws ssm put-parameter \
+  --name "/xomware/prod/anthropic-api-key" \
+  --value "sk-ant-..." \
+  --type SecureString
 
-config :my_app, MyApp.Repo,
-  url: System.fetch_env!("DATABASE_URL"),
-  pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
+# Retrieve at deploy time or app startup
+aws ssm get-parameter \
+  --name "/xomware/prod/anthropic-api-key" \
+  --with-decryption \
+  --query "Parameter.Value" --output text
+```
 
-config :my_app,
-  anthropic_api_key: System.fetch_env!("ANTHROPIC_API_KEY"),
-  env: System.get_env("MIX_ENV", "dev")
+```python
+# Python — fetch from SSM at startup
+import boto3
 
-# config/config.exs — static, non-secret config
-config :my_app,
-  ecto_repos: [MyApp.Repo],
-  max_retries: 3
+def get_secret(name: str) -> str:
+    ssm = boto3.client("ssm")
+    response = ssm.get_parameter(Name=name, WithDecryption=True)
+    return response["Parameter"]["Value"]
 ```
 
 ---
@@ -99,7 +108,7 @@ config :my_app,
 ```
 .env.example     ← committed — shows all required vars, no values
 .env.local       ← gitignored — local dev overrides
-.env             ← gitignored — populated by: infisical export --env=dev
+.env             ← gitignored — local dev values
 ```
 
 ```bash
@@ -111,12 +120,13 @@ LOG_LEVEL=info
 ```
 
 ```bash
-# Makefile or package.json
+# Makefile
 dev:
-  infisical run --env=dev -- npm run dev
+  source .env && python -m uvicorn app.main:app --reload
 
-prod:
-  infisical run --env=prod -- node dist/server.js
+# Or use dotenv CLI
+dev:
+  dotenv run -- npm run dev
 ```
 
 ---
@@ -132,8 +142,9 @@ secrets/
 ```
 
 ## Rules
-- `System.fetch_env!` / `z.string().min(1)` / pydantic required fields — **never optional for required secrets**
+- `z.string().min(1)` / pydantic required fields — **never optional for required secrets**
 - Validate and parse all config at startup — fail fast, clear error messages
 - `.env.example` is documentation — keep it current
 - Different credentials per environment — dev secrets never work in prod
 - Config is code-reviewed like code — treat changes to env structure seriously
+- Use AWS SSM Parameter Store for prod secrets — never commit them

@@ -39,7 +39,7 @@ Before writing any code:
 4. **Tag everything** -- `environment`, `project`, `owner` on every resource
 5. **Least privilege** -- IAM roles scoped tight, no `*` without justification
 6. **Tailscale sidecar** -- required for any ECS task needing VPS (Postgres/Redis)
-7. **Secrets** -- Infisical, not SSM Parameter Store, not hardcoded
+7. **Secrets** -- AWS SSM Parameter Store or Secrets Manager, never hardcoded
 8. **Pin versions** -- provider versions with `~>`, container images with tags (no `latest`)
 
 ## Quality Gate

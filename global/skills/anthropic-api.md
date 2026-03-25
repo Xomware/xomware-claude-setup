@@ -1,9 +1,15 @@
 ---
 name: anthropic-api
-description: Use when calling the Anthropic API — building Claude-powered features, artifacts, agentic workflows, or MCP integrations.
+description: >
+  ALWAYS use when writing code that calls the Anthropic API, Claude SDK, or builds
+  AI-powered features. Also triggers for: message streaming, tool use, system prompts,
+  prompt engineering, token counting, batch API, agentic workflows, or Claude artifacts.
+  Never write Anthropic API code without this skill.
+  Trigger phrases: "anthropic", "claude api", "messages.create", "tool_use",
+  "system prompt", "streaming", "SDK", "batch api", "prompt".
 ---
 
-# Anthropic API — Areté Patterns
+# Anthropic API — Xomware Patterns
 
 ## Basic Completion
 

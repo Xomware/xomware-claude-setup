@@ -1,9 +1,12 @@
 ---
 name: ios-standards
 description: >
-  Use when doing any iOS or macOS app work -- Swift, SwiftUI, Xcode, UIKit,
-  SwiftData, Core Data, SPM packages, Apple platform development. Covers
-  modern Swift 6+ conventions, SwiftUI best practices, and app architecture.
+  ALWAYS use when doing any iOS or macOS app work — Swift, SwiftUI, Xcode, UIKit,
+  SwiftData, Core Data, SPM packages, or Apple platform development. Covers modern
+  Swift 6+ conventions, SwiftUI best practices, and app architecture. Never write
+  Swift or SwiftUI without this skill.
+  Trigger phrases: "swift", "swiftui", "xcode", "ios", "macos", "uikit",
+  "swiftdata", "spm", "apple", "view model", "observable".
 ---
 
 # iOS / Swift Standards

@@ -97,7 +97,7 @@ Execute the chosen approach using the classified domain specialist:
 
 **Medium/Large scope (`/plan` or `/brainstorm`):** After plan is written and approved, delegate implementation to the domain specialist agent:
 - Frontend → `frontend-specialist` agent (preloads: frontend-standards, ts-component, api-route, nodejs)
-- Backend → `backend-specialist` agent (preloads: backend-standards, python, elixir, phoenix, database, error-handling)
+- Backend → `backend-specialist` agent (preloads: backend-standards, python, database, error-handling)
 - Infra → `infra-specialist` agent (preloads: infra-standards, terraform, docker-deploy, env-config)
 - iOS → `ios-specialist` agent (preloads: ios-standards)
 
