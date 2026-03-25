@@ -1,6 +1,11 @@
 ---
 name: ts-component
-description: Use when creating a new React/TypeScript component. Produces a properly typed, structured component following Areté's code standards.
+description: >
+  ALWAYS use when creating or refactoring a React/TypeScript component. Produces
+  properly typed, structured components following Xomware code standards. Also triggers
+  for: component props, hooks, state management, or component composition patterns.
+  Trigger phrases: "component", "tsx", "react component", "props", "hooks",
+  "useState", "useEffect", "functional component".
 ---
 
 # TypeScript React Component
@@ -42,8 +47,8 @@ components/
     [ComponentName].test.tsx   ← if adding tests
 ```
 
-## Areté UI Notes
-- Use Areté brand colors via CSS variables (see arete-brand skill)
+## Xomware UI Notes
+- Use Xomware brand colors via CSS variables
 - Tailwind: no `bg-white` — always `bg-[#FCFCF2]` (Ivory)
 - No rounded corners — `rounded-none`
 - Import shadcn/ui components when available before building from scratch

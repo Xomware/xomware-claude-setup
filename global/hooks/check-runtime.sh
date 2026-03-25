@@ -20,7 +20,6 @@ check() {
 
 check "node"   "Node.js"  "https://nodejs.org or: brew install node"
 check "python3" "Python 3" "https://python.org or: brew install python"
-check "elixir"  "Elixir"   "https://elixir-lang.org or: brew install elixir"
 
 echo ""
 echo "Note: Missing runtimes won't break Claude Code — hooks exit 0 when runtime unavailable."

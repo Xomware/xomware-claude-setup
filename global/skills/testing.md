@@ -1,9 +1,14 @@
 ---
 name: testing
-description: Use when writing tests across any Areté language. Covers patterns for TypeScript/Jest, Python/pytest, and Elixir/ExUnit.
+description: >
+  ALWAYS use when writing or modifying tests in any Xomware project. Covers patterns
+  for TypeScript/Jest/Vitest and Python/pytest. Also triggers for: test fixtures,
+  mocking, assertions, test structure, or CI test configuration.
+  Trigger phrases: "test", "jest", "vitest", "pytest", "mock", "fixture",
+  "assert", "describe", "it(", "test(".
 ---
 
-# Testing Patterns — Areté
+# Testing Patterns — Xomware
 
 ## Philosophy
 - Test behavior, not implementation — test what it does, not how
@@ -102,50 +107,10 @@ def mock_anthropic(mocker):
 
 ---
 
-## Elixir — ExUnit
-
-```elixir
-defmodule MyApp.AccountsTest do
-  use MyApp.DataCase, async: true  # async: true when no shared state
-
-  alias MyApp.Accounts
-
-  describe "create_user/1" do
-    test "returns {:ok, user} with valid attrs" do
-      assert {:ok, user} = Accounts.create_user(%{email: "test@example.com"})
-      assert user.email == "test@example.com"
-    end
-
-    test "returns {:error, changeset} with invalid email" do
-      assert {:error, changeset} = Accounts.create_user(%{email: "bad"})
-      assert "is invalid" in errors_on(changeset).email
-    end
-  end
-end
-
-# Factories with ex_machina
-defmodule MyApp.Factory do
-  use ExMachina.Ecto, repo: MyApp.Repo
-
-  def user_factory do
-    %MyApp.Accounts.User{
-      email: sequence(:email, &"user#{&1}@example.com"),
-      name: "Test User",
-    }
-  end
-end
-
-# Usage
-user = insert(:user)
-user = insert(:user, email: "custom@example.com")
-```
-
----
-
 ## Rules — All Languages
-- Tests live next to code: `module.test.ts`, `test_module.py`, `module_test.exs`
+- Tests live next to code: `module.test.ts`, `test_module.py`
 - No test depends on another test's state — each test is isolated
 - Mock at the boundary (network, DB, external APIs) — not internals
 - Test the public interface — if you're testing private functions, refactor instead
 - CI must pass before merge — no "I'll fix tests later"
-- Use `async: true` (Elixir) / parallel test runners where safe
+- Use parallel test runners where safe

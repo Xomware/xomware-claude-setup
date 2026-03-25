@@ -1,9 +1,14 @@
 ---
 name: logging
-description: Use when adding logging, structured logs, or observability to any Areté service. Covers structured logging patterns for TypeScript, Python, and Elixir.
+description: >
+  ALWAYS use when adding logging, structured logs, or observability to any service.
+  Covers structured logging patterns for TypeScript (pino) and Python. Also
+  triggers for: log levels, request tracing, telemetry, or debugging output formatting.
+  Trigger phrases: "logging", "logger", "pino", "log level", "structured log",
+  "observability", "telemetry", "tracing", "debug log".
 ---
 
-# Logging & Observability — Areté
+# Logging & Observability — Xomware
 
 ## Core Principle
 **Structured logs over printf.** Every log entry should be parseable. Include context, not just messages.
@@ -22,7 +27,7 @@ export const logger = pino({
     ? { target: "pino-pretty", options: { colorize: true } }
     : undefined,
   base: {
-    service: "arete-service-name",
+    service: "my-service",
     env: process.env.NODE_ENV,
   },
 });
@@ -62,33 +67,12 @@ structlog.configure(
 )
 
 # Usage
-log = logger.bind(service="arete-service", user_id=user_id)
+log = logger.bind(service="my-service", user_id=user_id)
 log.info("request_received", route=route, method=method)
 log.error("operation_failed", error=str(err), context=context)
 
 # Request-scoped context
 structlog.contextvars.bind_contextvars(request_id=request_id, user_id=user_id)
-```
-
----
-
-## Elixir — Logger (built-in) + :telemetry
-
-```elixir
-# Built-in Logger
-require Logger
-
-Logger.info("User action", user_id: user_id, action: :login)
-Logger.error("Operation failed", error: inspect(err), context: context)
-
-# Structured metadata — set per-request
-Logger.metadata(request_id: request_id, user_id: user_id)
-
-# config/config.exs
-config :logger,
-  level: :info,
-  format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id, :user_id, :module]
 ```
 
 ---

@@ -1,9 +1,14 @@
 ---
 name: terraform
-description: Use when writing Terraform modules, resources, variables, or state config. Covers Areté IaC conventions and safe patterns.
+description: >
+  ALWAYS use when writing, reviewing, or debugging Terraform or Terragrunt. Also
+  triggers for: AWS resources, IAM roles, OIDC setup, Terraform Cloud workspaces,
+  module design, state management, provider config. Never write IaC without this skill.
+  Trigger phrases: "terraform", "terragrunt", "tf", "hcl", "workspace",
+  "state file", "provider", "module", "apply", "plan", "destroy", "tfvars".
 ---
 
-# Terraform Patterns — Areté
+# Terraform Patterns — Xomware
 
 ## File Structure
 ```
@@ -32,7 +37,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "arete-terraform-state"
+    bucket         = "xomware-terraform-state"
     key            = "project/env/terraform.tfstate"
     region         = "us-east-1"
     encrypt        = true
@@ -119,7 +124,7 @@ module "database" {
 
 ## Rules
 - **Never commit `.tfstate` or `.tfstate.backup`** — always remote state
-- **Never hardcode secrets** — use `var` + Infisical/SSM/Secrets Manager
+- **Never hardcode secrets** — use `var` + AWS SSM/Secrets Manager
 - Run `terraform plan` before every `apply` — review the diff
 - `prevent_destroy = true` on prod databases and state buckets
 - All variables typed and described — no untyped `any` without comment

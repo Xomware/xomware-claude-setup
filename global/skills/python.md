@@ -1,9 +1,14 @@
 ---
 name: python
-description: Use when writing Python scripts, services, data processing, or AI tooling. Covers Areté conventions for Python 3.11+.
+description: >
+  ALWAYS use when writing Python code — scripts, services, data processing, Lambda
+  functions, or AI tooling. Covers Xomware conventions for Python 3.11+. Also triggers
+  for: FastAPI, pydantic, httpx, pyenv, type hints, or async Python patterns.
+  Trigger phrases: "python", "fastapi", "pydantic", "lambda function", "httpx",
+  "pyenv", "pip", "poetry", "pytest", "async def".
 ---
 
-# Python Patterns — Areté
+# Python Patterns — Xomware
 
 ## Project Setup
 ```toml
@@ -128,7 +133,7 @@ app = FastAPI(title="Service Name", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://app.aretecap.com"],
+    allow_origins=[settings.cors_origins],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -225,7 +230,7 @@ import httpx
 # Reuse client across requests (connection pooling)
 async def make_api_client() -> httpx.AsyncClient:
     return httpx.AsyncClient(
-        base_url="https://graph.microsoft.com/v1.0",
+        base_url="https://api.example.com/v1",
         timeout=httpx.Timeout(30.0),
         headers={"Authorization": f"Bearer {token}"},
     )

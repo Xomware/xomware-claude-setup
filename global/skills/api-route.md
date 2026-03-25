@@ -1,6 +1,11 @@
 ---
 name: api-route
-description: Use when creating a new Next.js API route or server action. Produces properly structured, typed, and error-handled route handlers.
+description: >
+  ALWAYS use when creating or modifying Next.js API routes, route handlers, or server
+  actions. Also triggers for: GET/POST/PUT/DELETE handlers, middleware, request
+  validation, response formatting in Next.js App Router.
+  Trigger phrases: "api route", "route handler", "server action", "app/api/",
+  "NextRequest", "NextResponse".
 ---
 
 # Next.js API Route

@@ -1,10 +1,12 @@
 ---
 name: frontend-standards
 description: >
-  Use when doing any frontend work -- React, Next.js, Tailwind, shadcn/ui,
-  UI components, design systems, accessibility, performance. Covers frontend
-  conventions and quality standards. Load alongside ts-component for
-  implementation patterns.
+  ALWAYS use when doing any frontend work — React, Next.js, Angular, Tailwind,
+  shadcn/ui, UI components, design systems, accessibility, or performance optimization.
+  Covers Xomware frontend conventions. Load alongside ts-component for implementation
+  patterns.
+  Trigger phrases: "react", "next.js", "angular", "tailwind", "shadcn", "component",
+  "UI", "layout", "styling", "accessibility", "a11y", "responsive", "design system".
 ---
 
 # Frontend Standards

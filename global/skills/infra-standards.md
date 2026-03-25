@@ -1,10 +1,11 @@
 ---
 name: infra-standards
 description: >
-  Use when doing any infrastructure work -- Terraform, AWS, CI/CD, Docker,
-  deployment, IAM, ECS, Lambda, GitHub Actions. Covers IaC and cloud
-  conventions. Load alongside terraform and docker-deploy skills for
-  implementation patterns.
+  ALWAYS use when doing any infrastructure work — Terraform, AWS, CI/CD, Docker,
+  deployment, IAM, ECS, Lambda, GitHub Actions. Covers IaC and cloud conventions.
+  Load alongside terraform and docker-deploy skills for implementation patterns.
+  Trigger phrases: "infra", "infrastructure", "aws", "iam", "ecs", "lambda",
+  "ci/cd", "github actions", "deploy", "cloud", "fargate".
 ---
 
 # Infra Standards

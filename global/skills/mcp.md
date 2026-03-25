@@ -1,9 +1,15 @@
 ---
 name: mcp
-description: Use when building or integrating MCP (Model Context Protocol) servers or clients — defining tools, resources, prompts, or connecting to existing MCP servers via Claude Code or the Anthropic API.
+description: >
+  ALWAYS use when building or integrating MCP (Model Context Protocol) servers or
+  clients. Also triggers for: defining tools, resources, prompts, transport layers,
+  connecting MCP servers to Claude Code, or wiring MCP into the Anthropic API.
+  Never build an MCP server without this skill.
+  Trigger phrases: "mcp", "model context protocol", "mcp server", "mcp client",
+  "tool definition", "mcp resource", "mcp transport", ".mcp.json".
 ---
 
-# MCP Patterns — Areté
+# MCP Patterns — Xomware
 
 ## What MCP Is
 MCP lets Claude interact with external systems through a standard protocol. You build an MCP server that exposes tools/resources, and Claude calls them like any other tool.
@@ -15,7 +21,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 
 const server = new McpServer({
-  name: "arete-[feature]-mcp",
+  name: "xom-[feature]-mcp",
   version: "1.0.0",
 });
 
@@ -38,13 +44,13 @@ server.tool(
 // Define a resource (read-only data)
 server.resource(
   "client_list",
-  "arete://clients",
+  "xom://clients",
   { mimeType: "application/json" },
   async () => {
     const clients = await listClients();
     return {
       contents: [{
-        uri: "arete://clients",
+        uri: "xom://clients",
         mimeType: "application/json",
         text: JSON.stringify(clients),
       }],
@@ -60,7 +66,7 @@ await server.connect(transport);
 ```python
 from mcp.server.fastmcp import FastMCP
 
-mcp = FastMCP("arete-feature-mcp")
+mcp = FastMCP("xom-feature-mcp")
 
 @mcp.tool()
 async def get_client_data(client_id: str, include_history: bool = False) -> str:
@@ -68,7 +74,7 @@ async def get_client_data(client_id: str, include_history: bool = False) -> str:
     data = await fetch_client(client_id, include_history=include_history)
     return json.dumps(data)
 
-@mcp.resource("arete://clients")
+@mcp.resource("xom://clients")
 async def client_list() -> str:
     """List all active clients."""
     clients = await list_clients()
@@ -83,7 +89,7 @@ if __name__ == "__main__":
 // ~/.claude/settings.json or project .claude/settings.json
 {
   "mcpServers": {
-    "arete-feature": {
+    "xom-feature": {
       "command": "node",
       "args": ["/path/to/mcp-server/dist/index.js"],
       "env": {
@@ -104,7 +110,7 @@ const response = await client.messages.create({
     {
       type: "url",
       url: "https://your-mcp-server.com/sse",
-      name: "arete-feature",
+      name: "xom-feature",
     }
   ],
 });
