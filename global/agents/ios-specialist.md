@@ -57,6 +57,10 @@ Before reporting back, verify:
 - [ ] No force unwraps without justification
 - [ ] Tests cover view model logic
 - [ ] Builds clean (no warnings)
+- [ ] Loading/empty/error states for all data-fetching views
+- [ ] Button press feedback (`.scaleEffect` + haptic) on all tappable elements
+- [ ] No hard-coded font sizes -- Dynamic Type only
+- [ ] 8pt spacing grid followed
 
 ## Handoff
 

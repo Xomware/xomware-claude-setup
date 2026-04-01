@@ -119,6 +119,41 @@ struct ItemListView: View {
 - One type per file, organized by feature not by type
 - Doc comments on all public API
 
+## Design & UX Standards
+
+**Spacing:**
+- 8pt base grid for all spacing -- every margin, padding, gap is a multiple of 8
+- Define spacing tokens in a shared struct (`xs: 4, sm: 8, md: 16, lg: 24, xl: 32`)
+- Screen edge margins: 16pt, card padding: 16pt, card gap: 12pt
+
+**Typography:**
+- SF Pro exclusively via Dynamic Type text styles (`.largeTitle`, `.title`, `.body`, etc.)
+- Never hard-code font sizes -- always `Text("...").font(.title)`, never `.font(.system(size: 28))`
+- Max 3 font weights per screen -- hierarchy from size and weight contrast, not variety
+
+**Color:**
+- Dark-first design -- build dark mode, derive light from it
+- Define semantic color tokens in Asset Catalog (`colorBackground`, `colorSurface`, `colorAccent`, etc.)
+- Use semantic system colors (`.label`, `.secondaryLabel`, `.systemBackground`) where possible
+- Follow 60-30-10 rule: background 60%, surface 30%, accent 10%
+
+**Loading & empty states:**
+- Never show a blank screen -- every data-fetching view needs: loading, loaded, empty, error states
+- Skeleton screens that match content shape (not generic spinners)
+- Empty states must be illustrated with a CTA -- never a dead end
+- Error states must have a retry button
+
+**Interaction feedback:**
+- Button press feedback on all tappable elements: `.scaleEffect(0.92)` + `.sensoryFeedback()`
+- Spring animations for interactive elements, `easeOut` for presentational -- never `.linear`
+- Define animation tokens and reuse them (e.g., `.snappy` for taps, `.spring` for bounces)
+- Match haptic intensity to action importance (light = minor, heavy = milestone)
+- Respect `isReduceMotionEnabled` -- always provide reduced-motion fallbacks
+
+**Optimistic UI:**
+- Social actions (likes, follows, saves) update UI immediately before API confirms
+- Revert gracefully on API failure with subtle error feedback
+
 ## Anti-Patterns (never ship)
 
 - `ObservableObject` when `@Observable` is available (iOS 17+)
