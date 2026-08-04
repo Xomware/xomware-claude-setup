@@ -1,70 +1,76 @@
 #!/usr/bin/env bash
 # xom-install-claude-setup
-# Installs Xomware global Claude Code config from this repo to ~/.claude/
-# Safe by default — never overwrites existing files unless --force is passed.
-# With --force, creates timestamped backups before overwriting.
+#
+# Skills, agents and hooks ship in the `xomware` plugin and are installed through
+# the plugin marketplace, not copied. This script installs only the two things a
+# plugin cannot carry:
+#
+#   ~/.claude/CLAUDE.md      global instructions
+#   ~/.claude/settings.json  permissions.deny and model defaults
+#     (plugin settings.json supports only `agent` and `subagentStatusLine`)
+#
+# It also clears out copies left by the pre-plugin installer, which would
+# otherwise shadow the plugin's agents and duplicate its skills.
+#
+# Safe by default — never overwrites without --force, and backs up first.
 
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
 SOURCE_DIR="$REPO_DIR/global"
 CLAUDE_DIR="$HOME/.claude"
+MARKETPLACE="Xomware/xomware-claude-setup"
 FORCE=false
+DRY_RUN=false
 BACKUP_DIR="$CLAUDE_DIR/.backups/$(date +%Y%m%d-%H%M%S)"
 
 usage() {
-  echo "Usage: xom-install-claude-setup [--force]"
-  echo ""
-  echo "Installs Xomware global Claude Code config to ~/.claude/"
-  echo ""
-  echo "Options:"
-  echo "  --force    Overwrite existing files (creates backups first)"
-  echo "  --dry-run  Show what would be done without doing it"
-  echo "  --help     Show this help"
-}
+  cat <<'USAGE'
+Usage: xom-install-claude-setup [--force] [--dry-run]
 
-DRY_RUN=false
+Installs the Xomware global CLAUDE.md and settings.json, and prints the
+commands to register the plugin marketplace.
+
+Options:
+  --force    Overwrite existing files (backs them up first)
+  --dry-run  Show what would happen without changing anything
+  --help     Show this help
+USAGE
+}
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --force) FORCE=true; shift ;;
     --dry-run) DRY_RUN=true; shift ;;
     --help) usage; exit 0 ;;
-    *) echo "Unknown option: $1"; usage; exit 1 ;;
+    *) echo "Unknown option: $1" >&2; usage; exit 1 ;;
   esac
 done
 
 log() { echo "  $1"; }
 
-backup_file() {
-  local file="$1"
-  if [[ -f "$file" ]]; then
-    local rel="${file#$CLAUDE_DIR/}"
-    local backup_path="$BACKUP_DIR/$rel"
-    mkdir -p "$(dirname "$backup_path")"
-    cp "$file" "$backup_path"
-  fi
+backup_path() {
+  local src="$1" rel="${1#$CLAUDE_DIR/}"
+  local dst="$BACKUP_DIR/$rel"
+  mkdir -p "$(dirname "$dst")"
+  cp -R "$src" "$dst"
 }
 
 copy_file() {
-  local src="$1"
-  local dst="$2"
+  local src="$1" dst="$2"
 
-  if [[ "$DRY_RUN" == "true" ]]; then
-    if [[ -f "$dst" ]] && [[ "$FORCE" == "false" ]]; then
-      log "SKIP (exists): $dst"
-    elif [[ -f "$dst" ]]; then
-      log "WOULD OVERWRITE (backup + copy): $dst"
-    else
-      log "WOULD CREATE: $dst"
-    fi
+  if [[ -f "$dst" && "$FORCE" == "false" ]]; then
+    log "SKIP (exists): $dst"
     return
   fi
 
-  if [[ -f "$dst" ]] && [[ "$FORCE" == "false" ]]; then
-    log "SKIP (exists): $dst"
-  elif [[ -f "$dst" ]]; then
-    backup_file "$dst"
+  if [[ "$DRY_RUN" == "true" ]]; then
+    [[ -f "$dst" ]] && log "WOULD OVERWRITE: $dst" || log "WOULD CREATE: $dst"
+    return
+  fi
+
+  if [[ -f "$dst" ]]; then
+    backup_path "$dst"
     cp "$src" "$dst"
     log "UPDATED (backed up): $dst"
   else
@@ -74,6 +80,22 @@ copy_file() {
   fi
 }
 
+# Remove a path the plugin now owns. Always backs up first — these are the only
+# copies if the user edited them in place.
+retire() {
+  local path="$1" reason="$2"
+  [[ -e "$path" ]] || return 0
+
+  if [[ "$DRY_RUN" == "true" ]]; then
+    log "WOULD RETIRE ($reason): $path"
+    return
+  fi
+
+  backup_path "$path"
+  rm -rf "$path"
+  log "RETIRED ($reason, backed up): $path"
+}
+
 echo "xom-install-claude-setup"
 echo "  Source: $SOURCE_DIR"
 echo "  Target: $CLAUDE_DIR"
@@ -81,55 +103,126 @@ echo "  Target: $CLAUDE_DIR"
 [[ "$DRY_RUN" == "true" ]] && echo "  Mode: DRY RUN"
 echo ""
 
-# Check hook runtimes
-if [[ -f "$SOURCE_DIR/hooks/check-runtime.sh" ]] && [[ "$DRY_RUN" == "false" ]]; then
+if [[ -f "$SOURCE_DIR/hooks/check-runtime.sh" && "$DRY_RUN" == "false" ]]; then
   bash "$SOURCE_DIR/hooks/check-runtime.sh" 2>/dev/null || true
 fi
 
-# Create directories
-if [[ "$DRY_RUN" == "false" ]]; then
-  mkdir -p "$CLAUDE_DIR"/{agents,skills,commands,output-styles,hooks}
-fi
+[[ "$DRY_RUN" == "false" ]] && mkdir -p "$CLAUDE_DIR"
 
-# CLAUDE.md
 copy_file "$SOURCE_DIR/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
 
-# settings.json
-if [[ -f "$CLAUDE_DIR/settings.json" ]] && [[ "$FORCE" == "false" ]]; then
-  log "SKIP (exists): $CLAUDE_DIR/settings.json — merge manually if needed"
+# settings.json is MERGED, never replaced. It holds personal keys the repo knows
+# nothing about — enabled plugins, tui mode, notification preferences — and a
+# wholesale copy silently destroys them.
+#
+# Merge rules:
+#   permissions.deny   union, repo rules added, yours kept
+#   enabledPlugins     union, xomware@xomware added, yours kept
+#   hooks              dropped once the plugin supplies them
+#   everything else    yours wins; repo value only fills a key you don't have
+if [[ "$DRY_RUN" == "true" ]]; then
+  log "WOULD MERGE: $CLAUDE_DIR/settings.json"
+elif ! command -v python3 >/dev/null 2>&1; then
+  log "SKIP: python3 not found — merge $SOURCE_DIR/settings.json by hand"
 else
-  copy_file "$SOURCE_DIR/settings.json" "$CLAUDE_DIR/settings.json"
+  [[ -f "$CLAUDE_DIR/settings.json" ]] && backup_path "$CLAUDE_DIR/settings.json"
+  SRC="$SOURCE_DIR/settings.json" DST="$CLAUDE_DIR/settings.json" python3 <<'PYMERGE'
+import json, os, pathlib
+
+src = json.load(open(os.environ["SRC"]))
+dst_path = pathlib.Path(os.environ["DST"])
+dst = json.load(open(dst_path)) if dst_path.exists() else {}
+
+src.pop("$comment", None)
+
+deny = dst.get("permissions", {}).get("deny", [])
+for rule in src.get("permissions", {}).pop("deny", []):
+    if rule not in deny:
+        deny.append(rule)
+if deny:
+    dst.setdefault("permissions", {})["deny"] = deny
+src.pop("permissions", None)
+
+plugins = dst.get("enabledPlugins", {})
+plugins.update(src.pop("enabledPlugins", {}))
+if plugins:
+    dst["enabledPlugins"] = plugins
+
+# The plugin owns the hooks now. Leaving them here too fires each one twice,
+# and the retire step below deletes the scripts these entries point at.
+removed_hooks = dst.pop("hooks", None) is not None
+
+for key, value in src.items():
+    dst.setdefault(key, value)
+
+dst_path.parent.mkdir(parents=True, exist_ok=True)
+with open(dst_path, "w") as f:
+    json.dump(dst, f, indent=2)
+    f.write("\n")
+
+print(f"  MERGED: {dst_path}")
+if removed_hooks:
+    print("    removed the hooks block — the xomware plugin provides these now")
+PYMERGE
 fi
 
-# Agents
-for f in "$SOURCE_DIR"/agents/*.md; do
+echo ""
+echo "Retiring pre-plugin copies:"
+
+# Agents: a user-level agent overrides a same-named plugin agent, so leftovers
+# silently win over the plugin and never update.
+for f in "$CLAUDE_DIR"/agents/*.md; do
   [[ -f "$f" ]] || continue
-  copy_file "$f" "$CLAUDE_DIR/agents/$(basename "$f")"
+  name="$(basename "$f" .md)"
+  [[ -f "$REPO_DIR/plugins/xomware/agents/$name.md" ]] || continue
+  retire "$f" "now provided by the xomware plugin"
 done
 
-# Skills
-for f in "$SOURCE_DIR"/skills/*.md; do
-  [[ -f "$f" ]] || continue
-  copy_file "$f" "$CLAUDE_DIR/skills/$(basename "$f")"
+# Skills: plugin skills are namespaced, so a leftover copy doesn't conflict — it
+# just shows up a second time and drifts.
+for d in "$CLAUDE_DIR"/skills/*/; do
+  [[ -d "$d" ]] || continue
+  name="$(basename "$d")"
+  [[ -f "$REPO_DIR/plugins/xomware/skills/$name/SKILL.md" ]] || continue
+  retire "${d%/}" "now provided by the xomware plugin"
 done
 
-# Commands
-for f in "$SOURCE_DIR"/commands/*.md; do
+# Flat skills/<name>.md were never loaded by Claude Code at all.
+for f in "$CLAUDE_DIR"/skills/*.md; do
   [[ -f "$f" ]] || continue
-  copy_file "$f" "$CLAUDE_DIR/commands/$(basename "$f")"
+  retire "$f" "flat skill file, never loaded"
 done
 
-# Hooks
-for f in "$SOURCE_DIR"/hooks/*.js; do
+# Commands superseded by a plugin skill of the same name.
+for f in "$CLAUDE_DIR"/commands/*.md; do
   [[ -f "$f" ]] || continue
-  copy_file "$f" "$CLAUDE_DIR/hooks/$(basename "$f")"
-  [[ "$DRY_RUN" == "false" ]] && chmod +x "$CLAUDE_DIR/hooks/$(basename "$f")"
+  name="$(basename "$f" .md)"
+  [[ -f "$REPO_DIR/plugins/xomware/skills/$name/SKILL.md" ]] || continue
+  retire "$f" "superseded by the xomware plugin skill"
+done
+
+# Hook scripts now invoked from the plugin via ${CLAUDE_PLUGIN_ROOT}.
+for f in guard-bash.js session-end.js track-changes.js; do
+  retire "$CLAUDE_DIR/hooks/$f" "now provided by the xomware plugin"
 done
 
 echo ""
 if [[ "$DRY_RUN" == "true" ]]; then
-  echo "Dry run complete. No files were changed."
-else
-  echo "Xomware global config installed to $CLAUDE_DIR"
-  [[ "$FORCE" == "true" ]] && echo "Backups saved to $BACKUP_DIR"
+  echo "Dry run complete. Nothing was changed."
+  exit 0
 fi
+
+echo "Global config installed."
+echo ""
+echo "Now install the plugin (one time):"
+echo ""
+echo "  claude plugin marketplace add $MARKETPLACE"
+echo "  claude plugin install xomware@xomware"
+echo ""
+echo "Already installed? Pull the latest instead:"
+echo ""
+echo "  claude plugin marketplace update xomware"
+echo "  claude plugin update xomware@xomware"
+echo ""
+[[ -d "$BACKUP_DIR" ]] && echo "Backups: $BACKUP_DIR"
+exit 0

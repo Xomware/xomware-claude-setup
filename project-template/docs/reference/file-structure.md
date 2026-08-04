@@ -127,7 +127,7 @@ Use rules/ to keep CLAUDE.md under 200 lines. Move directory-specific details he
 
 ### `.claude/memory/` — Session state (gitignored)
 
-Personal to your machine. Tracks what happened in each session and what files were changed. Managed automatically by hooks and `/end-session`.
+Personal to your machine. Superseded by auto memory, which Claude maintains at `~/.claude/projects/<repo>/memory/` and loads every session. Audit it with `/memory`.
 
 ## What's Versioned in Git vs. What's Not
 

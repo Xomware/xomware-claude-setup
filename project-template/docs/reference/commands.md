@@ -29,8 +29,7 @@ Quick reference for all available slash commands. Run any command by typing it i
 | `/compound [pattern]` | Capture a pattern into a reusable solution doc | After discovering a recurring issue or tricky pattern |
 | `/status` | Dashboard of all features and their status | Anytime — see what's in flight |
 | `/catchup` | Resume context from last session | Start of session |
-| `/sync-memory` | Backfill session log from git history | When /end-session was skipped |
-| `/end-session` | Log session summary, update Current Focus | End of every session |
+| `/catchup` | Reconcile auto memory against git and summarize where you left off | Picking a project back up |
 
 ## Setup Commands
 
@@ -53,6 +52,6 @@ Do you know what to build?
 Is it a large multi-feature effort?
   → /plan [epic] → /orchestrate → /plan each → /execute each
 
-Done for the day?
-  → /end-session
+Picking a project back up?
+  → /catchup
 ```

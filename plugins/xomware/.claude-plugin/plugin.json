@@ -1,0 +1,22 @@
+{
+  "name": "xomware",
+  "displayName": "Xomware Claude Setup",
+  "description": "Xomware engineering standards, workflow commands, and specialist agents for Claude Code — Angular, Swift/SwiftUI, Python Lambda, Terraform, and the research → brainstorm → plan → execute pipeline.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Dominick Giordano",
+    "url": "https://github.com/domgiordano"
+  },
+  "homepage": "https://github.com/Xomware/xomware-claude-setup",
+  "repository": "https://github.com/Xomware/xomware-claude-setup",
+  "license": "MIT",
+  "keywords": [
+    "xomware",
+    "angular",
+    "swift",
+    "python",
+    "lambda",
+    "terraform",
+    "workflow"
+  ]
+}
