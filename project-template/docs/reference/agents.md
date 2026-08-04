@@ -24,7 +24,6 @@ Agents are specialized subprocesses that handle specific tasks. They're invoked 
 | Agent | Model | What it does | Invoked by |
 |-------|-------|-------------|------------|
 | **compounder** | sonnet | Captures patterns into reusable solution docs | `/compound` |
-| **memory-updater** | sonnet | Writes session summaries, updates Current Focus | `/end-session` |
 
 ## Meta Agents
 

@@ -62,7 +62,7 @@ The brainstorm agent checks for a research doc automatically. Your options will 
 ```
 /plan [chosen option]
 /execute [feature]
-/end-session
+/review
 ```
 
 ---

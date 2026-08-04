@@ -9,7 +9,7 @@
 ## The Pipeline
 
 ```
-/brainstorm → /plan [epic] → /orchestrate [epic] → feature plans → /execute each → /end-session
+/brainstorm → /plan [epic] → /orchestrate [epic] → feature plans → /execute each → /review
 ```
 
 The epic and all sub-features live under `docs/features/`.
@@ -141,7 +141,7 @@ Run `/status` anytime for a dashboard view of all features.
 ## Step 6 — End Session
 
 ```
-/end-session
+/review
 ```
 
 Memory updater captures which sub-features are done, what's next, and any cross-cutting gotchas discovered during the session.
@@ -200,5 +200,5 @@ You:      /execute ai-reporting-R1-data-aggregation
           /execute ai-reporting-R4-delivery-ui
           [both run, both marked Done]
 
-You:      /end-session
+You:      /review
 ```

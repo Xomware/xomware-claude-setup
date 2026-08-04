@@ -139,7 +139,6 @@ Always:
 ### 12. Wrap Up
 Ask the user:
 - **Continue?** Pick up another issue (`/work-issue {next}`)
-- **End session?** Run `/end-session` to save learnings
 - **Compound?** If a reusable pattern was discovered, run `/compound`
 
 ## Usage

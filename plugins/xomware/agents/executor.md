@@ -65,7 +65,7 @@ When all steps are complete:
 2. Run the code-reviewer agent on changed files
 3. Write final summary to EXECUTION_LOG.md
 4. Report summary: files changed, steps completed, any issues found
-5. Suggest running `/end-session` to log learnings
+5. Suggest `/review` before committing, and `/compound` if a reusable pattern surfaced
 
 ### Handling Blockers Mid-Execution
 If you hit a blocker during execution (ambiguous requirement, missing dependency, unexpected error, decision needed):

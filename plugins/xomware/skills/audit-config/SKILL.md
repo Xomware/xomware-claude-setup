@@ -51,10 +51,9 @@ Check the health of this project's Claude configuration. Flag issues, suggest im
 | Check | Status | Action |
 |-------|--------|--------|
 | CLAUDE.md size | OK (142 lines) / WARN / CRITICAL | — / Split to rules/ |
-| Current Focus | Fresh / Stale / Missing | Update via /end-session |
 | Path-scopeable content | None / Found 3 sections | Move to rules/ |
 | Rules directory | Present / Missing | Create .claude/rules/ |
-| Session memory | Healthy / N stubs to clean | Run /sync-memory |
+| Auto memory | MEMORY.md under 200 lines / over | Trim the index, move detail to topic files |
 | Permissions | Deny rules present / Missing | Add deny rules |
 
 ### Suggested Actions

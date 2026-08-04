@@ -42,8 +42,8 @@
 ## Standard Workflow
 
 **Quick fix** (bug fix, small change, < 30 min): `/fix [description]`
-**Single feature**: `/research` (optional) → `/brainstorm` → `/plan` → `/execute` → `/end-session`
-**Epic (multi-feature)**: `/brainstorm` → `/plan [epic]` → `/orchestrate` → `/plan` each stub → `/execute` each → `/end-session`
+**Single feature**: `/research` (optional) → `/brainstorm` → `/plan` → `/execute` → `/review`
+**Epic (multi-feature)**: `/brainstorm` → `/plan [epic]` → `/orchestrate` → `/plan` each stub → `/execute` each
 
 Full walkthroughs: `@docs/workflows/feature-workflow.md`, `@docs/workflows/epic-workflow.md`, `@docs/workflows/research-workflow.md`
 
@@ -54,7 +54,7 @@ Rules:
 - Skip plan only for tiny tasks (single file, no risk, < 30 min)
 - Never execute a plan with status `Draft` — flip to `Ready` first
 - Use `/compound` to capture patterns worth preserving across sessions
-- Always run `/end-session` before closing
+- Run `/catchup` when picking a project back up after time away
 
 ## Pipeline Discipline — No Shortcuts
 
@@ -74,9 +74,11 @@ Rules:
 - `@docs/reference/file-structure.md` — where everything lives and why
 
 ## Memory
-- Session learnings should be appended to `.claude/memory/session-log.md` in the active project
-- Use the `#` shortcut to add quick memory items during sessions
-- Run `/end-session` before closing to summarize and commit learnings
+- Auto memory is on and handles session learnings — Claude writes them itself to
+  `~/.claude/projects/<repo>/memory/`, and the `MEMORY.md` index loads every session
+- Use the `#` shortcut to record something specific mid-session
+- Run `/memory` to audit or edit what has been saved
+- Git is the source of truth. When a memory contradicts the repo, trust the repo
 
 ## Git Commit Rules
 - Do NOT add "Co-Authored-By" lines to commit messages — ever, in any project
@@ -100,6 +102,5 @@ Rules:
 - Do NOT make changes to multiple files without presenting the full plan first.
 - Do NOT update `CLAUDE.md` without reading it first and checking the line count after.
 - Do NOT create speculative commands, skills, or agents. Build them when the need is confirmed.
-- Do NOT skip `/end-session`. Session memory is how you stay effective across sessions.
 - Do NOT put ephemeral state (current focus, branch lists, deploy checklists) in CLAUDE.md. Use memory files instead.
 - Do NOT duplicate CLAUDE.md content in MEMORY.md. Memory is for non-obvious context; CLAUDE.md is for rules.

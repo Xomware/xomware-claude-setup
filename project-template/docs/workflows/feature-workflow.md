@@ -8,7 +8,7 @@
 ## The Pipeline
 
 ```
-/brainstorm → /plan → /execute → /end-session
+/brainstorm → /plan → /execute → /review
 ```
 
 All artifacts land in `docs/features/[topic]/` — one folder per feature.
@@ -80,7 +80,7 @@ Claude will:
 ## Step 4 — End Session
 
 ```
-/end-session
+/review
 ```
 
 Claude will:
@@ -145,7 +145,7 @@ Claude: ## Execution Plan: Usage Dashboard
 You:    go
 
 Claude: [executes, ticks off steps, runs review]
-        Done. 4 files changed. /end-session to log.
+        Done. 4 files changed. /review before you commit.
 
-You:    /end-session
+You:    /review
 ```
