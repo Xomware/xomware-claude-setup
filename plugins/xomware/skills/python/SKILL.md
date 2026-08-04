@@ -1,104 +1,179 @@
 ---
 name: python
 description: >
-  ALWAYS use when writing Python code — scripts, services, data processing, Lambda
-  functions, or AI tooling. Covers Xomware conventions for Python 3.11+. Also triggers
-  for: FastAPI, pydantic, httpx, pyenv, type hints, or async Python patterns.
-  Trigger phrases: "python", "fastapi", "pydantic", "lambda function", "httpx",
-  "pyenv", "pip", "poetry", "pytest", "async def".
+  ALWAYS use when writing Python code — Lambda handlers, scripts, data processing, or AI
+  tooling. Covers Xomware conventions for Python 3.12+: pydantic v2, boto3, DynamoDB,
+  httpx, and pytest. For the shape of a Lambda endpoint specifically, load lambda-handler.
+  Trigger phrases: "python", "pydantic", "lambda function", "boto3", "dynamodb", "httpx",
+  "pip", "requirements.txt", "pytest", "async def", "ruff", "type hints".
 ---
 
 # Python Patterns — Xomware
 
-## Project Setup
-```toml
-# pyproject.toml (preferred over setup.py / requirements.txt)
-[project]
-name = "project-name"
-version = "0.1.0"
-requires-python = ">=3.11"
-dependencies = [
-    "anthropic>=0.30",
-    "pydantic>=2.0",
-]
+Xomware Python runs as AWS Lambda behind API Gateway, plus local scripts and tooling.
+There is no FastAPI, Flask, or long-lived ASGI server anywhere in the stack — for the
+endpoint pattern itself see the `lambda-handler` skill.
 
-[tool.ruff]          # linter + formatter
-line-length = 100
-target-version = "py311"
+## Project Setup
+
+Lambda backends pin exact versions in `requirements.txt` so the deployment bundle is
+reproducible. Standalone tooling can use `pyproject.toml`.
+
+```txt
+# requirements.txt — Python 3.12
+boto3==1.35.81
+pydantic==2.8.0
+PyJWT==2.9.0
+httpx[http2]==0.27.2
 ```
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"
+pip install -r requirements.txt
+```
+
+```toml
+# pyproject.toml — tooling config, present even when deps live in requirements.txt
+[tool.ruff]
+line-length = 100
+target-version = "py312"
 ```
 
 ## Types — Always
+
 ```python
-# Use type hints everywhere. Python 3.11+ — use built-ins not typing module
+from __future__ import annotations
+
+# Python 3.12+ — built-in generics, not the typing module
 def process(items: list[str], limit: int = 10) -> dict[str, int]:
     ...
-
-# Pydantic for data validation / config
-from pydantic import BaseModel, Field
-
-class Config(BaseModel):
-    api_key: str
-    max_retries: int = Field(default=3, ge=1, le=10)
-    debug: bool = False
 ```
 
-## Async
+Type-hint anything crossing a boundary: the Lambda `event`, an API response, a DynamoDB
+item. Those are the values that are actually untrusted.
+
+## Pydantic v2
+
 ```python
-import asyncio
-import httpx  # async HTTP — not requests
+from datetime import datetime
+from pydantic import BaseModel, Field, field_validator
 
-async def fetch(url: str) -> dict:
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url)
-        response.raise_for_status()
-        return response.json()
+class ShareCreate(BaseModel):
+    track_id: str = Field(..., min_length=1)
+    tags: list[str] = Field(default_factory=list)
+    priority: int = Field(default=0, ge=0, le=5)
 
-# Parallel
-results = await asyncio.gather(fetch(url1), fetch(url2))
+    @field_validator("tags")
+    @classmethod
+    def normalize_tags(cls, v: list[str]) -> list[str]:
+        return [t.lower().strip() for t in v]
+
+class ShareResponse(ShareCreate):
+    id: str
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
 ```
+
+Use `model_config`, not the inner `Config` class — that was v1.
+
+## boto3 and DynamoDB
+
+Create clients at module scope so they survive across warm invocations. Building one
+inside the handler pays the connection cost on every request.
+
+```python
+import boto3
+from boto3.dynamodb.conditions import Key
+
+_dynamo = boto3.resource("dynamodb")
+_table = _dynamo.Table(os.environ["SHARES_TABLE"])
+
+
+def get_share(share_id: str) -> dict | None:
+    resp = _table.get_item(Key={"shareId": share_id})
+    return resp.get("Item")
+
+
+def list_shares_for_user(email: str, limit: int = 25) -> list[dict]:
+    resp = _table.query(
+        IndexName="byOwner",
+        KeyConditionExpression=Key("ownerEmail").eq(email),
+        ScanIndexForward=False,
+        Limit=limit,
+    )
+    return resp.get("Items", [])
+```
+
+- **Query, never scan.** A `scan` reads the whole table and gets slower as data grows.
+  If a query needs an index that doesn't exist, add the GSI.
+- **DynamoDB returns `Decimal` for numbers.** Convert at the boundary before serializing;
+  `json.dumps` cannot handle `Decimal`.
+- **Batch reads with `batch_get_item`**, capped at 100 keys per call, rather than looping
+  `get_item`.
+- **Paginate.** A `query` returns at most 1 MB; follow `LastEvaluatedKey` when the caller
+  expects the full set.
+- All table access lives in `lambdas/common/<entity>_dynamo.py`, never inline in a handler.
+
+## Secrets and Config
+
+```python
+import boto3
+from functools import lru_cache
+
+_ssm = boto3.client("ssm")
+
+@lru_cache(maxsize=None)
+def get_parameter(name: str) -> str:
+    """Resolved once per container, not per invocation."""
+    resp = _ssm.get_parameter(Name=name, WithDecryption=True)
+    return resp["Parameter"]["Value"]
+```
+
+Secrets come from SSM Parameter Store or Secrets Manager, cached at cold start. Plain
+`os.environ` is fine for non-secret config like table names and log level.
 
 ## Error Handling
+
 ```python
-# Custom exceptions — be specific
-class AppError(Exception):
-    def __init__(self, message: str, code: str) -> None:
+class XomError(Exception):
+    def __init__(self, message: str, code: str, handler: str = "unknown") -> None:
         super().__init__(message)
         self.code = code
-
-# Context managers for cleanup
-from contextlib import asynccontextmanager
-
-@asynccontextmanager
-async def db_transaction(conn):
-    async with conn.transaction():
-        yield conn
+        self.handler = handler
 ```
 
-## Environment / Config
+Each backend defines its own hierarchy in `lambdas/common/errors.py` and a
+`@handle_errors` decorator that turns them into API Gateway responses. Raise the typed
+error; never return an error dict from business logic.
+
+## HTTP Clients
+
 ```python
-# Use pydantic-settings — validates and types env vars
-from pydantic_settings import BaseSettings
+import httpx
 
-class Settings(BaseSettings):
-    anthropic_api_key: str
-    database_url: str
-    debug: bool = False
+_client = httpx.Client(
+    base_url="https://api.spotify.com/v1",
+    timeout=httpx.Timeout(10.0),
+    http2=True,
+)
 
-    class Config:
-        env_file = ".env"
-
-settings = Settings()  # fails fast if required vars missing
+def fetch(endpoint: str, token: str) -> dict:
+    resp = _client.get(endpoint, headers={"Authorization": f"Bearer {token}"})
+    resp.raise_for_status()
+    return resp.json()
 ```
+
+- `httpx` over `requests`. Module-scope client for connection reuse across warm starts.
+- **Always set an explicit timeout.** The default is no timeout, which in Lambda means
+  hanging until the function times out and you pay for the full duration.
+- Async (`httpx.AsyncClient`, `asyncio.gather`) is worth it when a handler fans out to
+  several independent calls. A single sequential call does not need it.
 
 ## CLI Scripts
+
 ```python
 #!/usr/bin/env python3
-# Use typer for CLI tools
 import typer
 
 app = typer.Typer()
@@ -114,166 +189,42 @@ if __name__ == "__main__":
     app()
 ```
 
-## FastAPI
-
-```python
-from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Startup: init DB, connections, etc.
-    await init_db()
-    yield
-    # Shutdown: cleanup
-    await close_db()
-
-app = FastAPI(title="Service Name", lifespan=lifespan)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[settings.cors_origins],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-```
-
-### Routers
-```python
-from fastapi import APIRouter
-
-router = APIRouter(prefix="/api/v1/items", tags=["items"])
-
-@router.get("/", response_model=list[ItemResponse])
-async def list_items(
-    limit: int = 10,
-    offset: int = 0,
-    db: Database = Depends(get_db),
-) -> list[ItemResponse]:
-    return await db.fetch_items(limit=limit, offset=offset)
-
-@router.post("/", response_model=ItemResponse, status_code=status.HTTP_201_CREATED)
-async def create_item(
-    payload: ItemCreate,
-    db: Database = Depends(get_db),
-) -> ItemResponse:
-    return await db.create_item(payload)
-```
-
-### Dependencies
-```python
-from fastapi import Depends, Header, HTTPException
-
-async def verify_token(authorization: str = Header(...)) -> dict:
-    token = authorization.removeprefix("Bearer ")
-    try:
-        payload = decode_jwt(token)
-    except InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    return payload
-
-@router.get("/me")
-async def get_me(user: dict = Depends(verify_token)) -> dict:
-    return user
-```
-
-## Pydantic v2 Patterns
-
-```python
-from pydantic import BaseModel, Field, field_validator, model_validator
-
-class ItemCreate(BaseModel):
-    name: str = Field(..., min_length=1, max_length=100)
-    tags: list[str] = Field(default_factory=list)
-    priority: int = Field(default=0, ge=0, le=5)
-
-    @field_validator("tags")
-    @classmethod
-    def normalize_tags(cls, v: list[str]) -> list[str]:
-        return [t.lower().strip() for t in v]
-
-class ItemResponse(ItemCreate):
-    id: int
-    created_at: datetime
-
-    model_config = {"from_attributes": True}  # replaces orm_mode
-```
-
-## Async SQLite (aiosqlite)
-
-```python
-import aiosqlite
-
-DB_PATH = "data/app.db"
-
-async def get_db() -> aiosqlite.Connection:
-    db = await aiosqlite.connect(DB_PATH)
-    db.row_factory = aiosqlite.Row
-    await db.execute("PRAGMA journal_mode=WAL")
-    await db.execute("PRAGMA foreign_keys=ON")
-    return db
-
-async def fetch_items(db: aiosqlite.Connection, limit: int = 10) -> list[dict]:
-    async with db.execute(
-        "SELECT * FROM items ORDER BY created_at DESC LIMIT ?", (limit,)
-    ) as cursor:
-        rows = await cursor.fetchall()
-        return [dict(row) for row in rows]
-```
-
-## httpx Async Client
-
-```python
-import httpx
-
-# Reuse client across requests (connection pooling)
-async def make_api_client() -> httpx.AsyncClient:
-    return httpx.AsyncClient(
-        base_url="https://api.example.com/v1",
-        timeout=httpx.Timeout(30.0),
-        headers={"Authorization": f"Bearer {token}"},
-    )
-
-async def fetch_data(client: httpx.AsyncClient, endpoint: str) -> dict:
-    response = await client.get(endpoint)
-    response.raise_for_status()
-    return response.json()
-```
-
-## Testing (FastAPI)
+## Testing
 
 ```python
 import pytest
-from httpx import AsyncClient, ASGITransport
-from app.main import app
+from lambdas.shares_create.handler import handler
+
+def api_event(body: dict, email: str = "dom@example.com") -> dict:
+    return {
+        "body": json.dumps(body),
+        "requestContext": {"authorizer": {"email": email}},
+    }
+
+def test_rejects_missing_track_id():
+    resp = handler(api_event({}), None)
+    assert resp["statusCode"] == 400
 
 @pytest.fixture
-async def client():
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as ac:
-        yield ac
-
-@pytest.mark.asyncio
-async def test_list_items(client: AsyncClient):
-    response = await client.get("/api/v1/items/")
-    assert response.status_code == 200
-    assert isinstance(response.json(), list)
-
-@pytest.mark.asyncio
-async def test_create_item(client: AsyncClient):
-    response = await client.post("/api/v1/items/", json={"name": "Test"})
-    assert response.status_code == 201
-    assert response.json()["name"] == "Test"
+def stub_table(monkeypatch):
+    """Mock the _dynamo module, not boto3 itself."""
+    ...
 ```
 
+pytest, no unittest. Mock at the `_dynamo` module boundary — mocking `boto3` directly
+tests the AWS SDK rather than your code. Cover the happy path, each validation failure,
+missing caller identity, and not-found.
+
 ## Rules
-- Python 3.11+ — use match/case, `tomllib`, `TaskGroup`
-- Pydantic v2 for all data models — use `model_config` not inner `Config` class
-- `ruff` for linting and formatting — no black/flake8/pylint separately
-- `pytest` + `pytest-asyncio` for tests — no unittest
-- `httpx` for async HTTP — not `requests`
-- `aiosqlite` for async SQLite — always use WAL mode
-- FastAPI with `lifespan` — not `on_event` decorators (deprecated)
+
+- Python 3.12+ — `match`/`case`, `tomllib`, `TaskGroup` are available
+- `from __future__ import annotations` at the top of every module
+- Pydantic v2 for data models — `model_config`, not the inner `Config` class
+- `ruff` for lint and format — not black/flake8/pylint separately
+- `pytest` for tests — not unittest
+- `httpx` for HTTP, always with an explicit timeout — not `requests`
+- boto3 clients and SSM lookups at module scope, so warm starts reuse them
+- Convert `Decimal` to `int`/`float` before serializing DynamoDB items
 - Absolute imports only — no relative `from ..module`
-- No mutable default args: `def fn(items: list = None)` → `None` then assign
+- No mutable default args — default to `None` and assign inside
+- Never log a token, an auth header, or anything in the backend's `SENSITIVE_FIELDS`

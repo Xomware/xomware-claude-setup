@@ -4,7 +4,7 @@ description: >
   Full dev cycle for a GitHub issue: load the issue and all its comments, plan the
   work, delegate to the right specialist agents, and close the loop through review and
   board update.
-argument-hint: [issue-number]
+argument-hint: "[issue-number]"
 disable-model-invocation: true
 allowed-tools: Bash(gh issue:*) Bash(gh api:*) Bash(git:*)
 ---

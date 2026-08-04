@@ -4,7 +4,7 @@ description: >
   Investigate a technology, library, API, or approach and produce a structured findings
   doc at docs/features/[topic]/RESEARCH.md. Use before brainstorming when evaluating
   unfamiliar tech. Gathers facts; it is not solution design.
-argument-hint: [topic]
+argument-hint: "[topic]"
 ---
 
 # /research

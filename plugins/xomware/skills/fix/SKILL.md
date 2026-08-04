@@ -5,7 +5,7 @@ description: >
   run the linter, summarize. Use for bug fixes, config changes, and anything under ~30
   minutes. Skips brainstorm and plan. Escalates to /plan if the change turns out to
   touch 5+ files.
-argument-hint: [description]
+argument-hint: "[description]"
 ---
 
 # /fix

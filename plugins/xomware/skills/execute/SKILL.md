@@ -4,7 +4,7 @@ description: >
   Act on a written plan doc. Reads docs/features/[feature]/PLAN.md, shows a delegation
   preview of which agents and skills will run, waits for approval, then executes and
   logs progress to EXECUTION_LOG.md. Never runs a plan still marked Draft.
-argument-hint: [feature-name]
+argument-hint: "[feature-name]"
 ---
 
 # /execute

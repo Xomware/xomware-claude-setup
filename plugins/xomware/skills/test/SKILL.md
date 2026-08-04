@@ -3,7 +3,7 @@ name: test
 description: >
   Detect and run the project's test suite, diagnose any failures, and fix what can be
   fixed. Handles npm/vitest/jest, pytest, and Makefile test targets.
-argument-hint: [optional path or pattern]
+argument-hint: "[optional path or pattern]"
 ---
 
 # /test

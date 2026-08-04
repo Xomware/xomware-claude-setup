@@ -3,7 +3,7 @@ name: orchestrate
 description: >
   Decompose an epic plan into per-feature plan stubs and propose an execution order.
   Only for multi-feature epics — a single feature goes straight to /plan.
-argument-hint: [epic-name]
+argument-hint: "[epic-name]"
 ---
 
 # /orchestrate

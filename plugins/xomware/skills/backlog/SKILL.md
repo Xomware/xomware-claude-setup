@@ -3,7 +3,7 @@ name: backlog
 description: >
   Create a GitHub issue, add it to XomBoard, set its App/Category/Priority fields, and
   create the working branch.
-argument-hint: [title]
+argument-hint: "[title]"
 disable-model-invocation: true
 allowed-tools: Bash(gh issue:*) Bash(gh api:*) Bash(git checkout:*) Bash(git branch:*)
 ---

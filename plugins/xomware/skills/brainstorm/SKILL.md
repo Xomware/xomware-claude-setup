@@ -5,7 +5,7 @@ description: >
   tradeoffs, written to docs/features/[topic]/BRAINSTORM.md. Use at the start of a new
   feature when the approach is not yet decided. Skip it when the approach is already
   settled.
-argument-hint: [topic]
+argument-hint: "[topic]"
 ---
 
 # /brainstorm
