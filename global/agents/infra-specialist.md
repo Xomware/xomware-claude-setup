@@ -41,6 +41,10 @@ Before writing any code:
 6. **Tailscale sidecar** -- required for any ECS task needing VPS (Postgres/Redis)
 7. **Secrets** -- AWS SSM Parameter Store or Secrets Manager, never hardcoded
 8. **Pin versions** -- provider versions with `~>`, container images with tags (no `latest`)
+9. **Rollback plan** -- before any apply that touches live infrastructure, state how to
+   undo it. If the answer is "restore from backup", say so explicitly and confirm the
+   backup exists. Destructive plan output (`replace`, `destroy`) is a stop-and-confirm,
+   never something you apply on your own initiative.
 
 ## Quality Gate
 

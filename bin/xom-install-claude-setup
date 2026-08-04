@@ -107,10 +107,27 @@ for f in "$SOURCE_DIR"/agents/*.md; do
   copy_file "$f" "$CLAUDE_DIR/agents/$(basename "$f")"
 done
 
-# Skills
-for f in "$SOURCE_DIR"/skills/*.md; do
-  [[ -f "$f" ]] || continue
-  copy_file "$f" "$CLAUDE_DIR/skills/$(basename "$f")"
+# Skills — each skill is a directory containing SKILL.md plus optional supporting
+# files. Flat skills/<name>.md files are NOT discovered by Claude Code, so any
+# left over from an older install are removed.
+for legacy in "$CLAUDE_DIR"/skills/*.md; do
+  [[ -f "$legacy" ]] || continue
+  if [[ "$DRY_RUN" == "true" ]]; then
+    log "WOULD REMOVE (legacy flat skill, never loaded): $legacy"
+  else
+    backup_file "$legacy"
+    rm "$legacy"
+    log "REMOVED (legacy flat skill, never loaded): $legacy"
+  fi
+done
+
+for skill_dir in "$SOURCE_DIR"/skills/*/; do
+  [[ -f "$skill_dir/SKILL.md" ]] || continue
+  name="$(basename "$skill_dir")"
+  while IFS= read -r f; do
+    rel="${f#$skill_dir}"
+    copy_file "$f" "$CLAUDE_DIR/skills/$name/$rel"
+  done < <(find "$skill_dir" -type f ! -name '.*')
 done
 
 # Commands
