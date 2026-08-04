@@ -9,6 +9,7 @@ tools: Read, Write, Edit, Bash, Glob, Grep
 model: opus
 skills:
   - backend-standards
+  - lambda-handler
   - python
   - database
   - error-handling

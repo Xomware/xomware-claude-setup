@@ -11,6 +11,7 @@ model: opus
 memory: user
 skills:
   - frontend-standards
+  - angular-component
   - ts-component
   - nodejs
 ---
