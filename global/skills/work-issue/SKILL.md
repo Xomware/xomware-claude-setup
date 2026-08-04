@@ -1,3 +1,14 @@
+---
+name: work-issue
+description: >
+  Full dev cycle for a GitHub issue: load the issue and all its comments, plan the
+  work, delegate to the right specialist agents, and close the loop through review and
+  board update.
+argument-hint: [issue-number]
+disable-model-invocation: true
+allowed-tools: Bash(gh issue:*) Bash(gh api:*) Bash(git:*)
+---
+
 # /work-issue
 
 Full dev cycle orchestrator. Takes a GitHub issue number, loads all context, plans the work, and closes the loop.

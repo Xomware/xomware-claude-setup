@@ -1,3 +1,12 @@
+---
+name: catchup
+description: >
+  Resume context from the last session: read the session log and project CLAUDE.md,
+  then summarize what was last worked on, decisions made, and what is next.
+disable-model-invocation: true
+allowed-tools: Read Glob
+---
+
 # /catchup
 
 Resume context from last session.

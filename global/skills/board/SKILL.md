@@ -1,3 +1,13 @@
+---
+name: board
+description: >
+  Fetch the current state of XomBoard and show what is active, next, and blocked. Reads
+  the project number and owner from the Project Config block in the project's
+  CLAUDE.md.
+disable-model-invocation: true
+allowed-tools: Bash(gh api:*) Bash(gh project:*)
+---
+
 # /board
 
 Fetch the current state of XomBoard. Shows what's active, what's next, and what's blocked.

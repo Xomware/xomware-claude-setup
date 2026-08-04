@@ -1,3 +1,13 @@
+---
+name: fix
+description: >
+  Fast path for a small, well-understood change: locate the code, edit it, run tests,
+  run the linter, summarize. Use for bug fixes, config changes, and anything under ~30
+  minutes. Skips brainstorm and plan. Escalates to /plan if the change turns out to
+  touch 5+ files.
+argument-hint: [description]
+---
+
 # /fix
 
 Quick-fix pipeline for small changes that don't need brainstorm/plan. Use for bug fixes, small features, config changes, and anything under 30 minutes.

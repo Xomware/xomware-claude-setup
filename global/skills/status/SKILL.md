@@ -1,3 +1,12 @@
+---
+name: status
+description: >
+  Show the state of every feature in docs/features — status, which docs exist
+  (research, brainstorm, plan, execution log), and when each was last updated.
+disable-model-invocation: true
+allowed-tools: Read Glob Bash(git log:*)
+---
+
 # /status
 
 Show the current state of all features in this project.

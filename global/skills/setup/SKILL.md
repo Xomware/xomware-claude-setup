@@ -1,3 +1,11 @@
+---
+name: setup
+description: >
+  Walk through setting up Claude Code for this project step by step: check global and
+  project config exist, fill in template placeholders, and summarize the workflow.
+disable-model-invocation: true
+---
+
 # /setup
 
 Walk me through setting up Claude Code for this project step by step.

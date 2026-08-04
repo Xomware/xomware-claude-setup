@@ -1,3 +1,14 @@
+---
+name: audit-config
+description: >
+  Check the health of this project's Claude configuration — CLAUDE.md size, stale
+  content, missing rules — and flag issues with suggested fixes.
+disable-model-invocation: true
+allowed-tools: Read Glob Grep
+context: fork
+background: false
+---
+
 # /audit-config
 
 Check the health of this project's Claude configuration. Flag issues, suggest improvements.

@@ -1,3 +1,12 @@
+---
+name: sync-memory
+description: >
+  Reconcile session memory against actual git history. Use at session start when the
+  memory looks stale, or when /end-session was skipped last time.
+disable-model-invocation: true
+allowed-tools: Read Bash(git log:*) Bash(git diff:*)
+---
+
 # /sync-memory
 
 Reconcile session memory with the actual project state. Use at session start when memory is stale or when `/end-session` was skipped.

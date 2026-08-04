@@ -1,3 +1,12 @@
+---
+name: pr
+description: >
+  Prepare a pull request: summarize the diff and commits against main, draft a
+  What/Why/How/Testing description, and suggest a conventional-commit title.
+disable-model-invocation: true
+allowed-tools: Bash(git diff:*) Bash(git log:*) Bash(git status:*) Bash(gh pr:*)
+---
+
 # /pr
 
 Prepare a pull request for current changes.

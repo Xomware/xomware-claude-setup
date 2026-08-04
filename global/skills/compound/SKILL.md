@@ -1,3 +1,12 @@
+---
+name: compound
+description: >
+  Capture a pattern, gotcha, or design decision from this session into a reusable
+  solution doc under docs/solutions/. Use after discovering a recurring issue or
+  finishing something tricky.
+argument-hint: [what to document]
+---
+
 # /compound
 
 Capture a pattern, gotcha, or design decision from the current session into a reusable solution doc.

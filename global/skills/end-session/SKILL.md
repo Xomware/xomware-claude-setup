@@ -1,3 +1,12 @@
+---
+name: end-session
+description: >
+  Summarize this session and append a structured entry to
+  .claude/memory/session-log.md, then clear the dirty-files list. Run before closing a
+  session.
+disable-model-invocation: true
+---
+
 # /end-session
 
 Use the memory-updater agent to summarize this session.

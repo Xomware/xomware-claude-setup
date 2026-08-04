@@ -1,3 +1,12 @@
+---
+name: commit
+description: >
+  Stage changed files and create a structured commit message grouped by section.
+  Excludes secrets, build artifacts, and gitignored paths. Never pushes.
+disable-model-invocation: true
+allowed-tools: Bash(git status:*) Bash(git diff:*) Bash(git add:*) Bash(git commit:*) Bash(git log:*)
+---
+
 # /commit
 
 Analyze all changed files, stage them, and create a well-formatted commit. Do NOT push.

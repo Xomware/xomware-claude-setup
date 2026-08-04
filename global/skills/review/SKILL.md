@@ -1,3 +1,14 @@
+---
+name: review
+description: >
+  Review every changed file on the branch, auto-fix what can be fixed (dead code,
+  unused imports, lint and type errors, missing error handling), and report what
+  cannot. Runs the project's linter and type checker. Use before committing.
+allowed-tools: Read Grep Glob Bash(git diff:*) Bash(git status:*)
+context: fork
+background: false
+---
+
 # /review
 
 Review all changed code, clean up issues, and auto-fix where possible.
