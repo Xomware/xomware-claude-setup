@@ -111,12 +111,59 @@ fi
 
 copy_file "$SOURCE_DIR/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
 
-if [[ -f "$CLAUDE_DIR/settings.json" && "$FORCE" == "false" ]]; then
-  log "SKIP (exists): $CLAUDE_DIR/settings.json"
-  log "  Merge manually, or re-run with --force to replace it."
-  log "  It must contain: \"enabledPlugins\": { \"xomware@xomware\": true }"
+# settings.json is MERGED, never replaced. It holds personal keys the repo knows
+# nothing about — enabled plugins, tui mode, notification preferences — and a
+# wholesale copy silently destroys them.
+#
+# Merge rules:
+#   permissions.deny   union, repo rules added, yours kept
+#   enabledPlugins     union, xomware@xomware added, yours kept
+#   hooks              dropped once the plugin supplies them
+#   everything else    yours wins; repo value only fills a key you don't have
+if [[ "$DRY_RUN" == "true" ]]; then
+  log "WOULD MERGE: $CLAUDE_DIR/settings.json"
+elif ! command -v python3 >/dev/null 2>&1; then
+  log "SKIP: python3 not found — merge $SOURCE_DIR/settings.json by hand"
 else
-  copy_file "$SOURCE_DIR/settings.json" "$CLAUDE_DIR/settings.json"
+  [[ -f "$CLAUDE_DIR/settings.json" ]] && backup_path "$CLAUDE_DIR/settings.json"
+  SRC="$SOURCE_DIR/settings.json" DST="$CLAUDE_DIR/settings.json" python3 <<'PYMERGE'
+import json, os, pathlib
+
+src = json.load(open(os.environ["SRC"]))
+dst_path = pathlib.Path(os.environ["DST"])
+dst = json.load(open(dst_path)) if dst_path.exists() else {}
+
+src.pop("$comment", None)
+
+deny = dst.get("permissions", {}).get("deny", [])
+for rule in src.get("permissions", {}).pop("deny", []):
+    if rule not in deny:
+        deny.append(rule)
+if deny:
+    dst.setdefault("permissions", {})["deny"] = deny
+src.pop("permissions", None)
+
+plugins = dst.get("enabledPlugins", {})
+plugins.update(src.pop("enabledPlugins", {}))
+if plugins:
+    dst["enabledPlugins"] = plugins
+
+# The plugin owns the hooks now. Leaving them here too fires each one twice,
+# and the retire step below deletes the scripts these entries point at.
+removed_hooks = dst.pop("hooks", None) is not None
+
+for key, value in src.items():
+    dst.setdefault(key, value)
+
+dst_path.parent.mkdir(parents=True, exist_ok=True)
+with open(dst_path, "w") as f:
+    json.dump(dst, f, indent=2)
+    f.write("\n")
+
+print(f"  MERGED: {dst_path}")
+if removed_hooks:
+    print("    removed the hooks block — the xomware plugin provides these now")
+PYMERGE
 fi
 
 echo ""
