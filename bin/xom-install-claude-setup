@@ -169,6 +169,23 @@ fi
 echo ""
 echo "Retiring pre-plugin copies:"
 
+# Components deleted from the plugin outright, rather than moved into it. The
+# name-matching loops below can't catch these: they only remove a local copy when
+# the plugin still ships something by that name, so a deleted component would sit
+# in ~/.claude forever, still resolving and still doing the retired thing.
+#
+# Add an entry here whenever a skill or agent is removed from the plugin.
+RETIRED_SKILLS=(end-session sync-memory)
+RETIRED_AGENTS=(memory-updater forge patch pixel sable scout vex)
+
+for name in "${RETIRED_SKILLS[@]}"; do
+  retire "$CLAUDE_DIR/skills/$name" "retired — superseded by built-in auto memory"
+done
+
+for name in "${RETIRED_AGENTS[@]}"; do
+  retire "$CLAUDE_DIR/agents/$name.md" "retired from the xomware plugin"
+done
+
 # Agents: a user-level agent overrides a same-named plugin agent, so leftovers
 # silently win over the plugin and never update.
 for f in "$CLAUDE_DIR"/agents/*.md; do
