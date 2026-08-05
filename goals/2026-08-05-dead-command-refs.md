@@ -5,7 +5,7 @@
 **Tracking issue:** #8
 **Repo:** Xomware/xomware-claude-setup
 **Base branch:** main
-**Status:** awaiting review
+**Status:** done
 
 ## Objective
 
