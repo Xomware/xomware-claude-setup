@@ -8,11 +8,16 @@
 ## The Pipeline
 
 ```
-/brainstorm → /plan → /goals → /work-issue → /review
+/brainstorm → /plan → /goals → /work-issue → /review     ← tracked
+/brainstorm → /plan → /execute → /review                 ← untracked
 ```
 
+**Which path?** `/goals` + `/work-issue` when the work belongs on XomBoard, spans more than
+one sitting, or would hurt to lose to a compaction. `/execute` when it is a single focused
+change in a repo where an issue per task is overhead.
+
 Thinking artifacts land in `docs/features/[topic]/` — one folder per feature.
-Execution state lands in `goals/` — see `@docs/reference/goal-file-format.md`.
+Tracked execution state lands in `goals/` — see `@docs/reference/goal-file-format.md`.
 
 ---
 

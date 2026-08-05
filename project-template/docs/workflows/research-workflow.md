@@ -25,7 +25,7 @@ Skip it when:
 /research [topic]     → docs/features/[topic]/RESEARCH.md
 /brainstorm [topic]   → reads research doc automatically, sharper options
 /plan [option]        → docs/features/[topic]/PLAN.md
-/goals [feature]      → goals/[date]-[feature].md + issues
+/goals [feature]      → goals/[date]-[feature].md + issues  (or /execute to stay local)
 /work-issue           → build, task by task, to open PRs
 ```
 

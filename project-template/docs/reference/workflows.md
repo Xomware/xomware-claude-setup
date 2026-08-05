@@ -18,8 +18,9 @@ New feature, unclear approach?
   └─→ /review
 New feature, clear approach?
   └─→ /plan [feature]
-  └─→ /goals [feature]
-  └─→ /work-issue [number]
+  └─→ Should this be tracked on XomBoard?
+       ├─ yes → /goals [feature] → /work-issue
+       └─ no  → /execute [feature]
   └─→ /review
 Want all of it in one session?
   └─→ /cycle [feature]

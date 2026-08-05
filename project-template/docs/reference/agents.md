@@ -15,7 +15,8 @@ Agents are specialized subprocesses that handle specific tasks. They're invoked 
 
 | Agent | Model | What it does | Invoked by |
 |-------|-------|-------------|------------|
-| **code-reviewer** | sonnet | Reviews for quality, security, correctness | `/review`, or after `/work-issue` |
+| **executor** | sonnet | Executes plan docs step by step with audit trail, no GitHub | `/execute` |
+| **code-reviewer** | sonnet | Reviews for quality, security, correctness | `/review`, or after `/execute` / `/work-issue` |
 | **debugger** | sonnet | Root cause analysis for bugs | Direct invocation |
 
 ## Knowledge Agents
@@ -35,7 +36,8 @@ Agents are specialized subprocesses that handle specific tasks. They're invoked 
 - **Opus agents** handle thinking tasks (brainstorming, planning, research, architecture)
 - **Sonnet agents** handle execution tasks (coding, reviewing, logging)
 - Agents read from and write to `docs/features/[topic]/` — each feature gets its own folder
-- Execution state lives in `goals/` — see `goal-file-format.md`
+- The executor always shows a delegation preview before doing any work
+- Tracked execution state lives in `goals/` — see `goal-file-format.md`
 - Agents can be overridden per-project by placing a file with the same name in `.claude/agents/`
 
 ## Adding Project-Specific Agents

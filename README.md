@@ -60,8 +60,10 @@ drifted before. Change the repo, push, update.
 
 | | |
 |---|---|
-| `/research` `/brainstorm` `/plan` `/goals` `/orchestrate` | the feature pipeline |
-| `/cycle` | all four pipeline stages in one session, gated between each |
+| `/research` `/brainstorm` `/plan` `/orchestrate` | the feature pipeline |
+| `/execute` | act on a plan locally — no issues, no board, no PRs |
+| `/goals` `/work-issue` | the tracked path — goal file, issues, PRs, CI |
+| `/cycle` | all four tracked stages in one session, gated between each |
 | `/fix` | fast path for changes under ~30 min |
 | `/review` `/test` | quality gates — `/review` runs in a forked context |
 | `/commit` `/pr` `/backlog` `/board` `/work-issue` | git and XomBoard |
@@ -72,7 +74,7 @@ they run only when you type them.
 
 ### Agents
 
-`planner` · `brainstorm` · `researcher` · `orchestrator` ·
+`planner` · `brainstorm` · `researcher` · `executor` · `orchestrator` ·
 `backend-specialist` · `frontend-specialist` · `infra-specialist` · `ios-specialist` ·
 `code-reviewer` · `debugger` · `compounder` · `meta-agent`
 

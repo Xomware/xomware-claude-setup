@@ -27,7 +27,8 @@ your-project/
 │   │   ├── my-feature/
 │   │   │   ├── RESEARCH.md    ← from /research (optional)
 │   │   │   ├── BRAINSTORM.md  ← from /brainstorm (optional)
-│   │   │   └── PLAN.md        ← from /plan (required for /goals)
+│   │   │   ├── PLAN.md        ← from /plan (required for /execute and /goals)
+│   │   │   └── EXECUTION_LOG.md ← from /execute (untracked path only)
 │   │   └── my-epic/
 │   │       └── PLAN.md        ← epic plan, then /orchestrate creates sub-folders
 │   │

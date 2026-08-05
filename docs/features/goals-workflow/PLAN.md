@@ -266,8 +266,22 @@ Only map directories that are (a) more than ~5 files and (b) not obvious from th
 
 `/cycle` chains brainstorm → plan → goals → work-issue, honoring all three gates.
 
-`/execute` is retired. It overlaps `/work-issue` and has no issue tracking. Anything not
-worth an issue should be using `/fix`.
+`/execute` is **kept** as the untracked path — plan straight to work, no issues, no board, no
+PR loop. Revised 2026-08-05 after an initial decision to retire it.
+
+The retirement was wrong. `/work-issue` needs an issue number or a goal file, so removing
+`/execute` left no answer to "I have a plan and this work does not warrant an issue." The
+nearest substitute was `/work-issue goals/<file>.md`, which works but is undiscoverable — the
+command is named for issues and its first step fetches one.
+
+The two paths divide cleanly:
+
+| | `/execute` | `/goals` + `/work-issue` |
+| --- | --- | --- |
+| GitHub | none | issues + XomBoard |
+| State | `EXECUTION_LOG.md`, local | goal file, survives compaction |
+| Ends at | working tree | open PRs, green CI |
+| Use when | single sitting, issue is overhead | tracked, multi-sitting, or compaction would hurt |
 
 ---
 
@@ -290,7 +304,7 @@ Port `gw:goals` with these changes:
   issue to XomBoard with App / Category / Priority set
 - Keeps the confirmation gate before creating anything
 
-### Phase 3 — Upgrade `/work-issue`
+### Phase 3 — Upgrade `/work-issue` (keep `/execute`)
 
 Fold in, config-driven throughout:
 - Goal-file awareness — find the first `todo` task, honor `Depends on`
@@ -319,7 +333,7 @@ Ship after Phases 1-4 have run on at least one real feature.
 
 | Risk | Mitigation |
 | --- | --- |
-| Two execution commands drift apart | Retire `/execute`, fold everything into `/work-issue` |
+| Two execution commands drift apart | Keep both, but split by tracked vs untracked and say so in every doc that names either |
 | Autonomous loop produces unreviewable PR pile | Never merge; one task = one small PR |
 | Generated maps go stale and mislead | Pointer-style content, SHA footer, `--check` |
 | Goal files duplicate GitHub issues | Issues hold the work; goal file holds sequence + status. Do not restate issue bodies |
