@@ -36,9 +36,9 @@ Active work: @GOALS.md
      Fill in the values relevant to your project. Delete unused sections.
      Run /setup to fill this in interactively. -->
 ```yaml
-pm_tool: github-projects
-github_project_number: 2
-github_project_owner: Xomware
+pm_tool: none                            # none | github-projects — board is opt-in
+# github_project_number: 2               # only needed when pm_tool: github-projects
+# github_project_owner: Xomware
 base_branch: main                        # branch all work starts from
 goals_dir: goals                         # where /goals writes goal files
 # create_issues: true                    # set false for repos not worth an issue per task

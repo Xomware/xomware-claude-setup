@@ -41,6 +41,19 @@ not ready to become issues. The user flips it to `Ready` first.
 Read the plan in full. If it has no explicit phases, derive them from its natural
 sequencing — do not pad it with phases the plan does not imply.
 
+### 1.5 Prune completed goals
+
+Before writing anything new, tidy `GOALS.md`. For each row whose goal file has every task
+`in review` and every PR merged (`gh pr view {n} --json state`):
+
+- Move the row to `goals/ARCHIVE.md` with the completion date
+- Set the goal file header to `**Status:** done`
+
+The goal files themselves stay in `goals/` — only the index row moves. This keeps `GOALS.md`
+bounded to work actually in flight without a command existing solely to prune.
+
+Skip silently if `GOALS.md` does not exist or nothing is archivable.
+
 ### 2. Read Project Config
 
 From `.claude/CLAUDE.md`:
@@ -50,6 +63,7 @@ From `.claude/CLAUDE.md`:
 | `base_branch` | Recorded in the goal file header | **Stop and ask.** Never assume `main` |
 | `goals_dir` | Where the goal file goes | Default `goals` |
 | `create_issues` | Whether to touch GitHub at all | Default `true` |
+| `pm_tool` | `github-projects` enables the board; `none` skips it | Default `none` |
 | `github_project_number` / `github_project_owner` | XomBoard | Skip board step if absent |
 | `test_commands` | Quoted into task definitions of done | Note "no tests configured" |
 
@@ -113,17 +127,24 @@ One issue per task, labelled `task`:
 Then edit the tracking issue body to hold `- [ ] #{n} {title}` lines so GitHub renders
 progress automatically.
 
-### 6. Add everything to XomBoard
+### 6. Add everything to XomBoard — only if `pm_tool: github-projects`
 
-For each created issue:
+**Skip this entire step when `pm_tool` is `none` or absent.** The board is opt-in; most repos
+do not use it, and the skips save N round-trips per run.
 
 ```bash
-gh project item-add {github_project_number} --owner {github_project_owner} --url {issue_url}
+gh api graphql -f query='
+mutation($project:ID!, $content:ID!) {
+  addProjectV2ItemById(input:{projectId:$project, contentId:$content}) { item { id } }
+}' -f project="{project_node_id}" -f content="{issue_node_id}"
 ```
+
+> **Do not use `gh project item-add`.** It exits 0 and silently adds nothing on org projects.
+> The GraphQL mutation above works. Get the issue node id with `gh issue view N --json id`.
 
 > **Board items are not unique by issue number.** XomBoard spans every Xomware repo, so `#5`
 > matches an item in each repo that has one. **Always filter on `repository` as well as
-> `content.number`** when resolving an item id. This command adds N issues at once, so it
+> `content.number`** when resolving an item id. This step handles N issues at once, so it
 > gets N chances to edit the wrong card — and doing so fails silently.
 
 Set fields with `gh project item-edit`:

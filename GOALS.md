@@ -8,7 +8,7 @@ completed goals move to `goals/ARCHIVE.md`. If this file is growing, something i
 
 | Goal | File | Tracking | Status | Started |
 | ---- | ---- | -------- | ------ | ------- |
-| Remove refs to retired /end-session | `goals/2026-08-05-dead-command-refs.md` | #8 | not started | 2026-08-05 |
+| Remove refs to retired /end-session | `goals/2026-08-05-dead-command-refs.md` | #8 | awaiting review | 2026-08-05 |
 
 ## Status values
 

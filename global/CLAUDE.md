@@ -89,12 +89,11 @@ Rules:
 - Commit messages start with issue number: `#42 add coverage calculation`
 - PRs must use `Closes #N` in description — branch name alone does NOT auto-link
 
-## GitHub Projects Discipline
-- Always update board item status before closing an issue
-- Post completion comments on issues with summary of what was done
-- Never close an issue without updating the XomBoard item
-- Set App, Category, Priority fields when adding items to board
-- Move items through: Backlog → Up Next → In Progress → In Review → Done
+## Issue Discipline
+- Post completion comments on issues with a summary of what was done
+- Issues are what `Closes #N` links to and what makes `/work-issue` resumable — keep them
+- XomBoard is off by default. Set `pm_tool: github-projects` in a repo's Project Config to
+  opt that repo back in
 
 ## Lessons
 - Do NOT put project-specific rules in `~/.claude/CLAUDE.md`. Move them to the project's `.claude/CLAUDE.md` or `.claude/rules/`.

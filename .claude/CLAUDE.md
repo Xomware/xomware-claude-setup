@@ -43,9 +43,7 @@ claude plugin validate .                  # check the marketplace manifest
 ## Project Config
 
 ```yaml
-pm_tool: github-projects
-github_project_number: 2
-github_project_owner: Xomware
+pm_tool: none
 base_branch: main
 goals_dir: goals
 dev_domain: infra

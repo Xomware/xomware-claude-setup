@@ -21,7 +21,9 @@ Show the current state of all features in this project.
 3. Display a table sorted by status (In Progress first, then Ready, Blocked, Draft, Done)
 4. For each feature folder, note which docs exist (RESEARCH, BRAINSTORM, PLAN)
 5. Read `GOALS.md`. For each active goal, open its goal file and count tasks by status
-6. If `docs/solutions/` exists, show a count per category
+6. Flag **archivable** goals — every task `in review` and every PR merged. Check with
+   `gh pr view {n} --json state`. These are done and their row should leave `GOALS.md`
+7. If `docs/solutions/` exists, show a count per category
 
 ## Output Format
 
@@ -37,9 +39,14 @@ Show the current state of all features in this project.
 Docs key: R=Research, B=Brainstorm, P=Plan
 
 ## Goals in flight
-| Goal          | Tracking | Tasks                       | Status    |
-|---------------|----------|-----------------------------|-----------|
+| Goal          | Tracking | Tasks                       | Status      |
+|---------------|----------|-----------------------------|-------------|
 | Coverage calc | #142     | 2 done, 1 in review, 3 todo | in progress |
+
+## Archivable (2)
+These are complete — all PRs merged. `/goals` prunes them to goals/ARCHIVE.md on its next run.
+- Rate limiting (#118)
+- Usage dashboard (#131)
 
 ## Solutions (N total)
 - auth: 3 docs

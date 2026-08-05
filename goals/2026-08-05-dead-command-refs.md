@@ -5,7 +5,7 @@
 **Tracking issue:** #8
 **Repo:** Xomware/xomware-claude-setup
 **Base branch:** main
-**Status:** in progress
+**Status:** awaiting review
 
 ## Objective
 
@@ -17,7 +17,7 @@ files involved.
 ## Success criteria
 
 - [x] No doc *instructs* the reader to run `/end-session`
-- [ ] Goal archiving has a named owner that actually exists
+- [x] Goal archiving has a named owner that actually exists
 - [x] `claude plugin validate ./plugins/xomware` passes
 - [x] `claude plugin validate .` passes
 
@@ -83,7 +83,8 @@ Deploying requires bumping both `plugin.json` and `marketplace.json`.
 ### Task 2.1 — Give goal archiving a real owner
 
 - **Issue:** #10
-- **Status:** `todo`
+- **Status:** `in review`
+- **PR:** #13
 - **Depends on:** #9
 - **Files:** `plugins/xomware/skills/status/SKILL.md`, `plugins/xomware/skills/goals/SKILL.md`
 - **Approach:**
@@ -98,10 +99,10 @@ Deploying requires bumping both `plugin.json` and `marketplace.json`.
 
 **Definition of done:**
 
-- [ ] `/status` reports archivable goals
-- [ ] `/goals` prunes on next run
-- [ ] No new command created
-- [ ] Committed, pushed, PR opened, CI green
+- [x] `/status` reports archivable goals
+- [x] `/goals` prunes on next run
+- [x] No new command created
+- [x] Committed, pushed, PR opened (no CI on this repo)
 
 ---
 
@@ -110,9 +111,10 @@ Deploying requires bumping both `plugin.json` and `marketplace.json`.
 | Date | Task | Issue | PR | Commit | Notes / gotchas |
 | ---- | ---- | ----- | -- | ------ | --------------- |
 | 2026-08-05 | 1.1 | #9 | #12 | see PR | Success criterion as written could never pass — grep also matches legitimate historical mentions. Corrected above. |
+| 2026-08-05 | 2.1 | #10 | #13 | see PR | Scope grew: XomBoard is unused, so board steps are now gated behind `pm_tool` and default off across /goals, /work-issue, /backlog. |
 
 ## Open questions / deferred
 
-- `gh project item-add` exits 0 but silently adds nothing on this org project. GraphQL
-  `addProjectV2ItemById` works. Every skill that adds board items uses the broken form —
-  worth its own issue.
+- `gh project item-add` exits 0 but silently adds nothing on this org project. Resolved by
+  switching the three skills to the GraphQL `addProjectV2ItemById` mutation — though the path
+  is now off by default anyway, since the board is unused.
