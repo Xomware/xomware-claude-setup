@@ -21,6 +21,9 @@ New feature, clear approach?
   └─→ /goals [feature]
   └─→ /work-issue [number]
   └─→ /review
+Want all of it in one session?
+  └─→ /cycle [feature]
+       Same four stages, same three gates, no re-typing between them.
 Large multi-feature effort (epic)?
   └─→ /brainstorm [epic topic]
   └─→ /plan [epic]

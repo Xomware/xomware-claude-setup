@@ -61,6 +61,7 @@ drifted before. Change the repo, push, update.
 | | |
 |---|---|
 | `/research` `/brainstorm` `/plan` `/goals` `/orchestrate` | the feature pipeline |
+| `/cycle` | all four pipeline stages in one session, gated between each |
 | `/fix` | fast path for changes under ~30 min |
 | `/review` `/test` | quality gates — `/review` runs in a forked context |
 | `/commit` `/pr` `/backlog` `/board` `/work-issue` | git and XomBoard |

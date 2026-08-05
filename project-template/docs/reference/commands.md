@@ -12,6 +12,7 @@ Quick reference for all available slash commands. Run any command by typing it i
 | `/plan [topic]` | Write a structured implementation plan | After brainstorm, or when approach is already clear |
 | `/goals [topic]` | Plan → durable goal file + linked GitHub issues on XomBoard | When plan status is Ready |
 | `/work-issue [n]` | Issue → branch → tests → PR → CI; loops task-to-task in goal mode | To build what `/goals` scheduled |
+| `/cycle [feature]` | All four stages in one session, with a gate between each | Starting a feature from scratch in one sitting |
 | `/orchestrate [epic]` | Break epic plan into sub-feature folders | Multi-feature work with dependencies |
 
 ## Code Quality Commands
