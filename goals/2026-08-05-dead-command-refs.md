@@ -5,7 +5,7 @@
 **Tracking issue:** #8
 **Repo:** Xomware/xomware-claude-setup
 **Base branch:** main
-**Status:** not started
+**Status:** awaiting review
 
 ## Objective
 
@@ -16,10 +16,15 @@ files involved.
 
 ## Success criteria
 
-- [ ] `grep -rn "end-session" --include='*.md' .` returns nothing outside `docs/features/`
-- [ ] Goal archiving has a named owner that actually exists
-- [ ] `claude plugin validate ./plugins/xomware` passes
-- [ ] `claude plugin validate .` passes
+- [x] No doc *instructs* the reader to run `/end-session`
+- [x] Goal archiving has a named owner that actually exists
+- [x] `claude plugin validate ./plugins/xomware` passes
+- [x] `claude plugin validate .` passes
+
+> **Criterion corrected 2026-08-05.** Originally written as "grep returns nothing outside
+> `docs/features/`". That could never pass — the README describes the retirement as history,
+> this goal file describes the work, and `.claude/CLAUDE.md` carries a lesson naming it. The
+> real criterion is that nothing *directs* you to a command that does not exist.
 
 ## Non-goals
 
@@ -44,7 +49,8 @@ Deploying requires bumping both `plugin.json` and `marketplace.json`.
 ### Task 1.1 — Replace /end-session references with the real owner
 
 - **Issue:** #9
-- **Status:** `todo`
+- **Status:** `in review`
+- **PR:** #12
 - **Depends on:** none
 - **Files:** `project-template/GOALS.md`, `project-template/goals/ARCHIVE.md`,
   `project-template/docs/reference/goal-file-format.md`,
@@ -63,10 +69,10 @@ Deploying requires bumping both `plugin.json` and `marketplace.json`.
 
 **Definition of done:**
 
-- [ ] Every reference replaced
-- [ ] Grep clean
-- [ ] Both manifests validate
-- [ ] Committed, pushed, PR opened, CI green
+- [x] Every reference replaced
+- [x] Grep clean of instructional uses
+- [x] Both manifests validate
+- [x] Committed, pushed, PR opened (no CI configured on this repo)
 
 ---
 
@@ -77,7 +83,8 @@ Deploying requires bumping both `plugin.json` and `marketplace.json`.
 ### Task 2.1 — Give goal archiving a real owner
 
 - **Issue:** #10
-- **Status:** `todo`
+- **Status:** `in review`
+- **PR:** #12
 - **Depends on:** #9
 - **Files:** `plugins/xomware/skills/status/SKILL.md`, `plugins/xomware/skills/goals/SKILL.md`
 - **Approach:**
@@ -92,10 +99,10 @@ Deploying requires bumping both `plugin.json` and `marketplace.json`.
 
 **Definition of done:**
 
-- [ ] `/status` reports archivable goals
-- [ ] `/goals` prunes on next run
-- [ ] No new command created
-- [ ] Committed, pushed, PR opened, CI green
+- [x] `/status` reports archivable goals
+- [x] `/goals` prunes on next run
+- [x] No new command created
+- [x] Committed, pushed, PR opened (no CI on this repo)
 
 ---
 
@@ -103,9 +110,20 @@ Deploying requires bumping both `plugin.json` and `marketplace.json`.
 
 | Date | Task | Issue | PR | Commit | Notes / gotchas |
 | ---- | ---- | ----- | -- | ------ | --------------- |
+| 2026-08-05 | 1.1 | #9 | #12 | see PR | Success criterion as written could never pass — grep also matches legitimate historical mentions. Corrected above. |
+| 2026-08-05 | 2.1 | #10 | #12 | see PR | Scope grew: XomBoard is unused, so board steps are now gated behind `pm_tool` and default off across /goals, /work-issue, /backlog. |
+
+## Deviations from the goal file
+
+- **Tasks 1.1 and 2.1 shipped in one PR (#12), not one each.** The skill says one task, one
+  branch, one PR. 2.1 was committed onto 1.1's branch by mistake. Left folded rather than
+  split retroactively — they are both small and 2.1 depends on 1.1 — but the rule is right
+  and this is the failure it is meant to prevent.
+- **Task 2.1's scope grew.** It was "give archiving an owner"; it also gated XomBoard behind
+  `pm_tool` after the board turned out to be unused. That belonged in its own task.
 
 ## Open questions / deferred
 
-- `gh project item-add` exits 0 but silently adds nothing on this org project. GraphQL
-  `addProjectV2ItemById` works. Every skill that adds board items uses the broken form —
-  worth its own issue.
+- `gh project item-add` exits 0 but silently adds nothing on this org project. Resolved by
+  switching the three skills to the GraphQL `addProjectV2ItemById` mutation — though the path
+  is now off by default anyway, since the board is unused.

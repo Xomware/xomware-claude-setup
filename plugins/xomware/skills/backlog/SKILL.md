@@ -32,10 +32,18 @@ gh issue create \
   --label "{category}"
 ```
 
-### 3. Add to XomBoard
+### 3. Add to XomBoard — only if `pm_tool: github-projects`
+
+**Skip steps 3 and 4 entirely when `pm_tool` is `none` or absent.**
+
 ```bash
-gh project item-add {github_project_number} --owner {github_project_owner} --url {issue_url}
+gh api graphql -f query='
+mutation($project:ID!, $content:ID!) {
+  addProjectV2ItemById(input:{projectId:$project, contentId:$content}) { item { id } }
+}' -f project="{project_node_id}" -f content="{issue_node_id}"
 ```
+
+> **Do not use `gh project item-add`.** It exits 0 and silently adds nothing on org projects.
 
 ### 4. Set Board Fields
 
@@ -72,8 +80,7 @@ Ready to work. Run /work-issue {number} to start.
 ```
 
 ## Rules
-- ALWAYS add the issue to XomBoard after creating
-- ALWAYS set App, Category, and Priority on the board item
+- Add to XomBoard and set App/Category/Priority ONLY when `pm_tool: github-projects`
 - Auto-detect App from repo name when possible (e.g. xomify-frontend → Xomify)
 - Create the branch but do NOT start coding — let the user decide when to begin
 

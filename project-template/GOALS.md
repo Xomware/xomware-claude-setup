@@ -1,7 +1,7 @@
 # Active Goals
 
-Index of goals currently in flight. Created by `/goals`, updated by `/work-issue`, pruned by
-`/end-session`.
+Index of goals currently in flight. Created by `/goals`, updated by `/work-issue`. `/status`
+reports which rows are archivable; `/goals` prunes them on its next run.
 
 **This file is an index, not a log.** One row per active goal. Detail lives in the goal file;
 completed goals move to `goals/ARCHIVE.md`. If this file is growing, something is wrong.
@@ -19,5 +19,5 @@ completed goals move to `goals/ARCHIVE.md`. If this file is growing, something i
 | `awaiting review` | Every task is `in review` — PRs open, nothing merged |
 | `blocked` | Stopped on something that needs a decision |
 
-`done` never appears here. A goal is done when its PRs are merged, and at that point
-`/end-session` moves the row to `goals/ARCHIVE.md`.
+`done` never appears here. A goal is done when its PRs are merged, and at that point its row
+moves to `goals/ARCHIVE.md`.

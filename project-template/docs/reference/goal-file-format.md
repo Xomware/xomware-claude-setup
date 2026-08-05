@@ -1,7 +1,7 @@
 # Goal File Format
 
 The canonical structure of a goal file. Written by `/goals`, executed and updated by
-`/work-issue`, indexed in `GOALS.md`, archived by `/end-session`.
+`/work-issue`, indexed in `GOALS.md`, archived by `/goals` on its next run.
 
 A goal file is the **durable, resumable state** of a feature in flight. It exists so a
 session that has been compacted — or a session that starts tomorrow with no memory of today
@@ -121,7 +121,7 @@ One row per completed task. Newest last.
 | `todo` | Not started | `/goals` |
 | `in progress` | Being worked right now | `/work-issue` at start |
 | `in review` | PR open, CI green, not merged | `/work-issue` at PR open |
-| `done` | **Merged** | Manual, or `/end-session` |
+| `done` | **Merged** | Manual, after you merge the PR |
 | `blocked` | Needs a decision | `/work-issue` on stop |
 
 **`done` means merged.** The execution loop never merges — review is yours — so the loop can

@@ -54,8 +54,8 @@ In goal mode:
 - `gh issue view {number} --json title,body,labels,assignees,comments`
 - **Read ALL comments** — look for CI triage bot analysis: type, priority, scope, branch
   name, files involved, recommended approach
-- Check XomBoard via `gh api graphql` using `github_project_number` / `github_project_owner`
-- Summarize: issue title, type, priority, triage findings, board status
+- Check XomBoard **only if `pm_tool: github-projects`** — skip when `none` or absent
+- Summarize: issue title, type, priority, triage findings, and board status if the board is on
 
 > **Board items are not unique by issue number.** XomBoard spans every Xomware repo, so `#5`
 > matches an item in each repo that has one. **Always filter on `repository` as well as
@@ -87,13 +87,15 @@ git switch -c {type}/{number}-{short-desc} origin/{base_branch}
 
 Never commit directly to the base branch.
 
-## Step 3 — Board to In Progress
+## Step 3 — Board to In Progress — only if `pm_tool: github-projects`
 
-Update Status to `In Progress` via `gh project item-edit`. Add the issue to the board first
-if it is not there. In goal mode, set the task's status to `in progress` in the goal file.
+**Skip entirely when `pm_tool` is `none` or absent.** In goal mode still set the task's status
+to `in progress` in the goal file — that is the state that matters and it is not board-gated.
 
-Resolve the item id by matching **both** `repository` and `content.number` — see the warning
-in Step 1.
+When the board is on: update Status to `In Progress` via `gh project item-edit`, adding the
+issue first if absent. Resolve the item id by matching **both** `repository` and
+`content.number` — see the warning in Step 1. Use the GraphQL `addProjectV2ItemById` mutation
+to add, never `gh project item-add`, which exits 0 and silently does nothing.
 
 ## Step 4 — Deep analysis
 
@@ -262,7 +264,8 @@ No CI configured — note it once and move on.
 ## Step 13 — Close the loop
 
 - Post a completion comment on the issue: what was done, root cause if a bug fix
-- Board → `In Review`. **Never set `Done`** — done means merged, and you do not merge
+- Board → `In Review`, **only if `pm_tool: github-projects`**. **Never set `Done`** — done
+  means merged, and you do not merge
 - Goal file: task `in progress` → `in review`, record PR number and URL, tick the definition
   of done, append the progress log row
 - Last task in a phase → mark the phase complete
