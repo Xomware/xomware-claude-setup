@@ -6,6 +6,12 @@
 > This file is loaded into every Claude session. Keep it lean and accurate.
 > For how the workflow system works, see `docs/reference/`.
 
+Active work: @GOALS.md
+
+<!-- The line above is the ONLY in-flight state that belongs in this file. Never append
+     work logs, goal entries, or status here — that lives in GOALS.md and goals/*.md.
+     See docs/reference/goal-file-format.md. -->
+
 ## What This Is
 <!-- What does this project do? Who uses it? One paragraph. -->
 
@@ -21,6 +27,8 @@
        docs/features/    — one folder per feature (RESEARCH, BRAINSTORM, PLAN, EXECUTION_LOG)
        docs/solutions/   — reusable patterns from /compound
        docs/reference/   — system docs (commands, agents, workflows, file structure)
+       GOALS.md          — index of goals in flight (see docs/reference/goal-file-format.md)
+       goals/            — one file per goal; ARCHIVE.md indexes completed ones
      Delete these comments and list your project-specific paths. -->
 
 ## Project Config
@@ -32,6 +40,8 @@ pm_tool: github-projects
 github_project_number: 2
 github_project_owner: Xomware
 base_branch: main                        # branch all work starts from
+goals_dir: goals                         # where /goals writes goal files
+# create_issues: true                    # set false for repos not worth an issue per task
 # dev_domain: backend                    # frontend | backend | infra | ios | fullstack (auto-detected if missing)
 test_commands:
   - echo "no tests configured"

@@ -10,6 +10,7 @@ Quick reference for all available slash commands. Run any command by typing it i
 | `/research [topic]` | Investigate a technology before brainstorming | Unfamiliar library, API, or architecture question |
 | `/brainstorm [topic]` | Explore options, converge to 2-3 with tradeoffs | Start of a new feature when approach is unclear |
 | `/plan [topic]` | Write a structured implementation plan | After brainstorm, or when approach is already clear |
+| `/goals [topic]` | Plan → durable goal file + linked GitHub issues on XomBoard | When plan status is Ready and the work needs tracking |
 | `/execute [feature]` | Act on a plan — shows preview, waits for approval | When plan status is Ready |
 | `/orchestrate [epic]` | Break epic plan into sub-feature folders | Multi-feature work with dependencies |
 
@@ -47,10 +48,10 @@ Is the approach unclear?
   → /brainstorm (or /research first if tech is unfamiliar)
 
 Do you know what to build?
-  → /plan → /execute
+  → /plan → /goals → /work-issue
 
 Is it a large multi-feature effort?
-  → /plan [epic] → /orchestrate → /plan each → /execute each
+  → /plan [epic] → /orchestrate → /plan each → /goals each → /work-issue each
 
 Picking a project back up?
   → /catchup

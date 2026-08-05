@@ -13,18 +13,21 @@ New feature, unclear approach?
   └─→ Unfamiliar tech? → /research [topic] first
   └─→ /brainstorm [topic]
   └─→ /plan [chosen option]
-  └─→ /execute [feature]
+  └─→ /goals [feature]          — goal file + issues, gated
+  └─→ /work-issue [number]      — loops task → PR until blocked or done
   └─→ /review
 New feature, clear approach?
   └─→ /plan [feature]
-  └─→ /execute [feature]
+  └─→ /goals [feature]
+  └─→ /work-issue [number]
   └─→ /review
 Large multi-feature effort (epic)?
   └─→ /brainstorm [epic topic]
   └─→ /plan [epic]
   └─→ /orchestrate [epic]
   └─→ /plan each sub-feature
-  └─→ /execute each sub-feature
+  └─→ /goals each sub-feature
+  └─→ /work-issue each
   └─→ /review
 ```
 
