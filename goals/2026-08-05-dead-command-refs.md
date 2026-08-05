@@ -5,7 +5,7 @@
 **Tracking issue:** #8
 **Repo:** Xomware/xomware-claude-setup
 **Base branch:** main
-**Status:** not started
+**Status:** in progress
 
 ## Objective
 
@@ -16,10 +16,15 @@ files involved.
 
 ## Success criteria
 
-- [ ] `grep -rn "end-session" --include='*.md' .` returns nothing outside `docs/features/`
+- [x] No doc *instructs* the reader to run `/end-session`
 - [ ] Goal archiving has a named owner that actually exists
-- [ ] `claude plugin validate ./plugins/xomware` passes
-- [ ] `claude plugin validate .` passes
+- [x] `claude plugin validate ./plugins/xomware` passes
+- [x] `claude plugin validate .` passes
+
+> **Criterion corrected 2026-08-05.** Originally written as "grep returns nothing outside
+> `docs/features/`". That could never pass — the README describes the retirement as history,
+> this goal file describes the work, and `.claude/CLAUDE.md` carries a lesson naming it. The
+> real criterion is that nothing *directs* you to a command that does not exist.
 
 ## Non-goals
 
@@ -44,7 +49,8 @@ Deploying requires bumping both `plugin.json` and `marketplace.json`.
 ### Task 1.1 — Replace /end-session references with the real owner
 
 - **Issue:** #9
-- **Status:** `todo`
+- **Status:** `in review`
+- **PR:** #12
 - **Depends on:** none
 - **Files:** `project-template/GOALS.md`, `project-template/goals/ARCHIVE.md`,
   `project-template/docs/reference/goal-file-format.md`,
@@ -63,10 +69,10 @@ Deploying requires bumping both `plugin.json` and `marketplace.json`.
 
 **Definition of done:**
 
-- [ ] Every reference replaced
-- [ ] Grep clean
-- [ ] Both manifests validate
-- [ ] Committed, pushed, PR opened, CI green
+- [x] Every reference replaced
+- [x] Grep clean of instructional uses
+- [x] Both manifests validate
+- [x] Committed, pushed, PR opened (no CI configured on this repo)
 
 ---
 
@@ -103,6 +109,7 @@ Deploying requires bumping both `plugin.json` and `marketplace.json`.
 
 | Date | Task | Issue | PR | Commit | Notes / gotchas |
 | ---- | ---- | ----- | -- | ------ | --------------- |
+| 2026-08-05 | 1.1 | #9 | #12 | see PR | Success criterion as written could never pass — grep also matches legitimate historical mentions. Corrected above. |
 
 ## Open questions / deferred
 

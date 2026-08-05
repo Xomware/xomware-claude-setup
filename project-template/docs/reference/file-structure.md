@@ -20,7 +20,7 @@ your-project/
 ├── GOALS.md                   ← index of goals in flight (from /goals)
 ├── goals/
 │   ├── 2026-08-05-my-goal.md  ← phases, tasks, progress log
-│   └── ARCHIVE.md             ← completed goals (pruned by /end-session)
+│   └── ARCHIVE.md             ← completed goals (pruned by /goals)
 │
 ├── docs/
 │   ├── features/              ← one folder per feature/initiative

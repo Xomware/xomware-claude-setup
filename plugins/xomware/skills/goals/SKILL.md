@@ -14,7 +14,7 @@ allowed-tools: Read Write Edit Glob Grep Bash(gh:*) Bash(git:*) Bash(mkdir:*) Ba
 Convert an approved plan into a resumable goal file and a linked set of GitHub issues.
 Third step in the pipeline:
 
-`/brainstorm` → `/plan` → **`/goals`** → `/work-issue` → `/end-session`
+`/brainstorm` → `/plan` → **`/goals`** → `/work-issue` → `/review`
 
 The goal file is durable state. A session that has been compacted, or one that starts
 tomorrow with no memory of today, resumes from it without re-reading the plan or the diff.
