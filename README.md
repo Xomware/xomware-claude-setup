@@ -68,6 +68,7 @@ drifted before. Change the repo, push, update.
 | `/review` `/test` | quality gates — `/review` runs in a forked context |
 | `/commit` `/pr` `/backlog` `/board` `/work-issue` | git and XomBoard |
 | `/status` `/catchup` `/compound` `/audit-config` `/setup` | project state and config |
+| `/map` | per-directory README maps so agents locate code without reading the repo |
 
 Twelve of these set `disable-model-invocation`, so Claude never triggers them on its own —
 they run only when you type them.

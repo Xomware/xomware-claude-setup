@@ -30,6 +30,7 @@ Quick reference for all available slash commands. Run any command by typing it i
 | Command | What it does | When to use |
 |---------|-------------|-------------|
 | `/compound [pattern]` | Capture a pattern into a reusable solution doc | After discovering a recurring issue or tricky pattern |
+| `/map [dir]` | Generate per-directory README maps; `--check` reports drift | When agents keep hunting for the same code |
 | `/status` | Dashboard of all features and their status | Anytime — see what's in flight |
 | `/catchup` | Resume context from last session | Start of session |
 | `/catchup` | Reconcile auto memory against git and summarize where you left off | Picking a project back up |
