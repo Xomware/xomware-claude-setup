@@ -62,7 +62,8 @@ Use this exact structure:
 Tell the user:
 1. Where the file was saved
 2. Which agents/skills are queued for execution
-3. That they can run `/execute [feature-name]` to start with a delegation preview
+3. That they should flip Status to `Ready`, then run `/goals [feature-name]` to turn the
+   plan into a goal file and linked issues
 
 ## Principles
 - Steps must be specific enough to execute without guessing

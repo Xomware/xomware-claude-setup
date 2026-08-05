@@ -25,10 +25,11 @@ Skip it when:
 /research [topic]     → docs/features/[topic]/RESEARCH.md
 /brainstorm [topic]   → reads research doc automatically, sharper options
 /plan [option]        → docs/features/[topic]/PLAN.md
-/execute [feature]    → build
+/goals [feature]      → goals/[date]-[feature].md + issues
+/work-issue           → build, task by task, to open PRs
 ```
 
-All artifacts land in the same feature folder.
+Thinking artifacts land in the same feature folder; execution state lands in `goals/`.
 
 ---
 
@@ -61,7 +62,8 @@ The brainstorm agent checks for a research doc automatically. Your options will 
 
 ```
 /plan [chosen option]
-/execute [feature]
+/goals [feature]
+/work-issue
 /review
 ```
 
@@ -73,8 +75,10 @@ The brainstorm agent checks for a research doc automatically. Your options will 
 docs/features/rate-limiting/
 ├── RESEARCH.md        ← findings from the spike
 ├── BRAINSTORM.md      ← options explored, decision made
-├── PLAN.md            ← implementation plan
-└── EXECUTION_LOG.md   ← step-by-step audit trail
+└── PLAN.md            ← implementation plan
+
+goals/
+└── 2026-08-05-rate-limiting.md   ← phases, tasks, progress log
 ```
 
 ---

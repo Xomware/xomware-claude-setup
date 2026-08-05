@@ -8,10 +8,11 @@
 ## The Pipeline
 
 ```
-/brainstorm → /plan → /execute → /review
+/brainstorm → /plan → /goals → /work-issue → /review
 ```
 
-All artifacts land in `docs/features/[topic]/` — one folder per feature.
+Thinking artifacts land in `docs/features/[topic]/` — one folder per feature.
+Execution state lands in `goals/` — see `@docs/reference/goal-file-format.md`.
 
 ---
 
@@ -57,27 +58,52 @@ Claude will:
 
 ---
 
-## Step 3 — Execute
+## Step 3 — Goals
 
 **When**: Plan status is `Ready`.
 
 ```
-/execute rate-limiting
+/goals rate-limiting
 ```
 
 Claude will:
-1. Read `docs/features/rate-limiting/PLAN.md`
-2. Output a delegation table — what runs, in what order, which model
-3. **Pause and wait for your go-ahead**
-4. Execute step by step, ticking off checkboxes in the plan doc as it goes
-5. Log progress to `docs/features/rate-limiting/EXECUTION_LOG.md`
-6. Run code-reviewer on changed files when done
+1. Read `docs/features/rate-limiting/PLAN.md` — and stop if it is still `Draft`
+2. Break it into phases and tasks, one task per PR
+3. Show you the phase/task/issue count and **wait for confirmation**
+4. Create a tracking issue plus one issue per task, all on XomBoard
+5. Write `goals/2026-08-05-rate-limiting.md` and add a row to `GOALS.md`
 
-**You**: Review the delegation table. Say "go" or adjust before anything runs.
+**You**: Check the task breakdown. Issues are not tidily reversible, so this is the gate.
 
 ---
 
-## Step 4 — End Session
+## Step 4 — Work
+
+**When**: The goal file exists.
+
+```
+/work-issue                    ← resumes the active goal
+```
+
+For each task, in a loop with no gates between:
+1. Branch from `base_branch`
+2. Write the named tests first — they must fail for the right reason
+3. Implement the minimum that makes them pass
+4. Green the whole suite, update docs, commit
+5. Push, open a PR assigned to you, watch CI to green
+6. Mark the task `in review` and move to the next one
+
+It stops when the suite cannot go green, CI fails three times, the approach no longer matches
+the code, or every task is `in review`.
+
+**Claude never merges.** Review is yours. Worst case for an unattended run is a stack of PRs
+you close.
+
+**You**: Review and merge the PRs, in order if any are stacked.
+
+---
+
+## Step 5 — End Session
 
 ```
 /review
@@ -99,11 +125,14 @@ After a full run, `docs/features/rate-limiting/` contains:
 docs/features/rate-limiting/
 ├── RESEARCH.md        ← if /research was run first (optional)
 ├── BRAINSTORM.md      ← options explored and decision made
-├── PLAN.md            ← implementation plan (Draft → Ready → Done)
-└── EXECUTION_LOG.md   ← step-by-step audit trail
+└── PLAN.md            ← implementation plan (Draft → Ready → Done)
+
+goals/
+└── 2026-08-05-rate-limiting.md   ← phases, tasks, progress log
 ```
 
-Everything about one piece of work lives together.
+Thinking lives in `docs/features/`; execution state lives in `goals/`. The split matters —
+the goal file is what a compacted session reads to pick up where it stopped.
 
 ---
 
@@ -131,21 +160,32 @@ Claude: [writes docs/features/usage-dashboard/PLAN.md]
         Status: Draft — review and set to Ready when happy.
 
 You:    [reviews plan, sets status to Ready]
-        /execute usage-dashboard
+        /goals usage-dashboard
 
-Claude: ## Execution Plan: Usage Dashboard
-        | Step | Action                        | Agent          | Model  |
-        |------|-------------------------------|----------------|--------|
-        | 1    | Create SSE endpoint           | direct         | sonnet |
-        | 2    | Build dashboard component     | ts-component   | sonnet |
-        | 3    | Add workspace aggregation     | direct         | sonnet |
-        | 4    | Review all changes            | code-reviewer  | sonnet |
-        Ready to execute?
+Claude: Goal:       Usage Dashboard
+        Goal file:  goals/2026-08-05-usage-dashboard.md
+        Phases:
+          1. Data layer — 2 tasks
+          2. UI — 2 tasks
+        Issues to create: 1 tracking + 4 tasks
+        Board: XomBoard #2 (Xomware)
 
 You:    go
 
-Claude: [executes, ticks off steps, runs review]
-        Done. 4 files changed. /review before you commit.
+Claude: Goal file:  goals/2026-08-05-usage-dashboard.md
+        Tracking:   #201
+        Tasks:      4 issues created, added to XomBoard
+        Next: /work-issue 202
 
-You:    /review
+You:    /work-issue
+
+Claude: [Task 1.1 — SSE endpoint]
+        [writes tests, watches them fail, implements, suite green]
+        PR #206 open, CI green. Task 1.1 in review.
+        [Task 1.2 — workspace aggregation]
+        ...
+        All 4 tasks in review. Merge order: #206, #207, #208, #209.
+
+You:    [reviews and merges]
+        /review
 ```

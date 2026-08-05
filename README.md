@@ -60,7 +60,7 @@ drifted before. Change the repo, push, update.
 
 | | |
 |---|---|
-| `/research` `/brainstorm` `/plan` `/execute` `/orchestrate` | the feature pipeline |
+| `/research` `/brainstorm` `/plan` `/goals` `/orchestrate` | the feature pipeline |
 | `/fix` | fast path for changes under ~30 min |
 | `/review` `/test` | quality gates — `/review` runs in a forked context |
 | `/commit` `/pr` `/backlog` `/board` `/work-issue` | git and XomBoard |
@@ -71,7 +71,7 @@ they run only when you type them.
 
 ### Agents
 
-`planner` · `brainstorm` · `researcher` · `executor` · `orchestrator` ·
+`planner` · `brainstorm` · `researcher` · `orchestrator` ·
 `backend-specialist` · `frontend-specialist` · `infra-specialist` · `ios-specialist` ·
 `code-reviewer` · `debugger` · `compounder` · `meta-agent`
 

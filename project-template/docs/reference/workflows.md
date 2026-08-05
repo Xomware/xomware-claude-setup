@@ -55,7 +55,8 @@ Everything lands in one folder. Plan requires `Ready` status before execution.
 /plan [epic]            →  docs/features/[epic]/PLAN.md (high-level only)
 /orchestrate [epic]     →  creates sub-feature folders
 /plan [each feature]    →  fills in sub-feature plans
-/execute [each feature] →  builds each with audit trail
+/goals [each feature]   →  goal file + issues per feature
+/work-issue             →  builds each, task by task, to open PRs
 /review
 ```
 
