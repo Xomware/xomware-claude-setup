@@ -84,7 +84,7 @@ Deploying requires bumping both `plugin.json` and `marketplace.json`.
 
 - **Issue:** #10
 - **Status:** `in review`
-- **PR:** #13
+- **PR:** #12
 - **Depends on:** #9
 - **Files:** `plugins/xomware/skills/status/SKILL.md`, `plugins/xomware/skills/goals/SKILL.md`
 - **Approach:**
@@ -111,7 +111,16 @@ Deploying requires bumping both `plugin.json` and `marketplace.json`.
 | Date | Task | Issue | PR | Commit | Notes / gotchas |
 | ---- | ---- | ----- | -- | ------ | --------------- |
 | 2026-08-05 | 1.1 | #9 | #12 | see PR | Success criterion as written could never pass — grep also matches legitimate historical mentions. Corrected above. |
-| 2026-08-05 | 2.1 | #10 | #13 | see PR | Scope grew: XomBoard is unused, so board steps are now gated behind `pm_tool` and default off across /goals, /work-issue, /backlog. |
+| 2026-08-05 | 2.1 | #10 | #12 | see PR | Scope grew: XomBoard is unused, so board steps are now gated behind `pm_tool` and default off across /goals, /work-issue, /backlog. |
+
+## Deviations from the goal file
+
+- **Tasks 1.1 and 2.1 shipped in one PR (#12), not one each.** The skill says one task, one
+  branch, one PR. 2.1 was committed onto 1.1's branch by mistake. Left folded rather than
+  split retroactively — they are both small and 2.1 depends on 1.1 — but the rule is right
+  and this is the failure it is meant to prevent.
+- **Task 2.1's scope grew.** It was "give archiving an owner"; it also gated XomBoard behind
+  `pm_tool` after the board turned out to be unused. That belonged in its own task.
 
 ## Open questions / deferred
 
