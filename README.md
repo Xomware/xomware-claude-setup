@@ -120,6 +120,18 @@ Scaffolds `.claude/` from `project-template/`: a `CLAUDE.md` stub, path-scoped r
 and scheduled routines** get the plugin too. Plugins enabled only in user settings don't
 reach those environments.
 
+## The goals pipeline
+
+```
+/brainstorm → /plan → /goals → /work-issue
+```
+
+`/goals` turns a Ready plan into a durable goal file plus linked issues; `/work-issue` builds
+it task by task to open PRs and never merges. `/cycle` runs all four in one session.
+
+**→ [How to use it](docs/goals-pipeline.md)** — walkthrough, when to use `/execute` instead,
+setup a new repo needs, and the gotchas.
+
 ## Memory
 
 Auto memory is on. Claude writes learnings to `~/.claude/projects/<repo>/memory/` itself
