@@ -121,6 +121,11 @@ For each created issue:
 gh project item-add {github_project_number} --owner {github_project_owner} --url {issue_url}
 ```
 
+> **Board items are not unique by issue number.** XomBoard spans every Xomware repo, so `#5`
+> matches an item in each repo that has one. **Always filter on `repository` as well as
+> `content.number`** when resolving an item id. This command adds N issues at once, so it
+> gets N chances to edit the wrong card — and doing so fails silently.
+
 Set fields with `gh project item-edit`:
 - **Status**: `Backlog` — the loop moves it to `In Progress` when work starts
 - **App**: auto-detect from repo name (`xomify-frontend` → Xomify, `xomper-ios` → Xomper)

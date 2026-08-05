@@ -38,6 +38,11 @@ gh project item-add {github_project_number} --owner {github_project_owner} --url
 ```
 
 ### 4. Set Board Fields
+
+> **Board items are not unique by issue number.** XomBoard spans every Xomware repo, so `#5`
+> matches an item in each repo that has one. **Always filter on `repository` as well as
+> `content.number`** when resolving the item id. Editing the wrong card fails silently.
+
 Use `gh project item-edit` to set:
 - **Status**: Backlog (default) or Up Next if urgent
 - **App**: from step 1

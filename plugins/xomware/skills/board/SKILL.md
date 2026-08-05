@@ -43,6 +43,9 @@ Fetch the current state of XomBoard. Shows what's active, what's next, and what'
 
 2. **Group and display** by Status column in this order: In Progress, In Review, Up Next, Backlog, Done (last 5 only)
 
+   Always show `repository` alongside the issue number. XomBoard spans every Xomware repo, so
+   a bare `#5` is ambiguous — several repos have one.
+
    **ALWAYS use this table format for every section:**
    ```
    ### In Progress (N)

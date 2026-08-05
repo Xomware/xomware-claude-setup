@@ -57,6 +57,10 @@ In goal mode:
 - Check XomBoard via `gh api graphql` using `github_project_number` / `github_project_owner`
 - Summarize: issue title, type, priority, triage findings, board status
 
+> **Board items are not unique by issue number.** XomBoard spans every Xomware repo, so `#5`
+> matches an item in each repo that has one. **Always filter on `repository` as well as
+> `content.number`** when locating an item. Editing the wrong card fails silently.
+
 ## Step 2 — Branch
 
 Base branch from Project Config. **If it is missing, stop and ask** — never fall back to
@@ -87,6 +91,9 @@ Never commit directly to the base branch.
 
 Update Status to `In Progress` via `gh project item-edit`. Add the issue to the board first
 if it is not there. In goal mode, set the task's status to `in progress` in the goal file.
+
+Resolve the item id by matching **both** `repository` and `content.number` — see the warning
+in Step 1.
 
 ## Step 4 — Deep analysis
 
