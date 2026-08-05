@@ -42,8 +42,10 @@
 ## Standard Workflow
 
 **Quick fix** (bug fix, small change, < 30 min): `/fix [description]`
-**Single feature**: `/research` (optional) → `/brainstorm` → `/plan` → `/execute` → `/review`
-**Epic (multi-feature)**: `/brainstorm` → `/plan [epic]` → `/orchestrate` → `/plan` each stub → `/execute` each
+**Single feature, tracked**: `/research` (optional) → `/brainstorm` → `/plan` → `/goals` → `/work-issue` → `/review`
+**Single feature, untracked**: `/brainstorm` → `/plan` → `/execute` → `/review` — no issues, no board
+**Single feature, one sitting**: `/cycle [feature]` — the tracked path, same gates, no re-typing
+**Epic (multi-feature)**: `/brainstorm` → `/plan [epic]` → `/orchestrate` → `/plan` each stub → `/goals` each → `/work-issue` each
 
 Full walkthroughs: `@docs/workflows/feature-workflow.md`, `@docs/workflows/epic-workflow.md`, `@docs/workflows/research-workflow.md`
 

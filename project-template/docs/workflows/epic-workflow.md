@@ -9,7 +9,7 @@
 ## The Pipeline
 
 ```
-/brainstorm → /plan [epic] → /orchestrate [epic] → feature plans → /execute each → /review
+/brainstorm → /plan [epic] → /orchestrate [epic] → feature plans → /goals + /work-issue each → /review
 ```
 
 The epic and all sub-features live under `docs/features/`.
@@ -99,25 +99,25 @@ The orchestrator agent reads the epic plan and:
 ```
 Sequential       — R-1 → R-2 → R-3 → R-4 (safe, predictable)
 Parallel tracks  — R-1 first, then R-2+R-3 in parallel, then R-4
-Manual           — I'll /execute each one myself when I'm ready
+Manual           — I'll /goals each one myself when I'm ready
 ```
 
 ---
 
-## Step 4 — Execute Feature Plans
+## Step 4 — Build Each Feature Plan
 
 Each feature plan runs exactly like the standard workflow:
 
 ```
-/execute ai-reporting-R1-data-aggregation
+/goals ai-reporting-R1-data-aggregation
+/work-issue
 ```
 
-The executor:
-- Shows delegation preview for that feature
-- Waits for go-ahead
-- Ticks off steps in the feature plan doc
-- Logs progress to `docs/features/ai-reporting-R1-data-aggregation/EXECUTION_LOG.md`
-- Updates the sub-feature status in the epic plan when done
+`/goals` turns that sub-feature plan into its own goal file plus issues, gated on your
+confirmation. `/work-issue` then loops through its tasks to open PRs.
+
+One goal file per sub-feature, not one for the whole epic. Each stays small enough to finish,
+and the epic plan tracks which sub-features are done.
 
 ---
 
@@ -184,21 +184,25 @@ Claude:   Epic: AI Reporting System
           How do you want to run this?
             [A] Sequential — R1 → R2 → R3 → R4
             [B] Parallel where possible — R1 → R2 → (R3 || R4)
-            [C] Manual — I'll execute each myself
+            [C] Manual — I'll build each myself
 
 You:      B — parallel where possible
 
-Claude:   Got it. Start with /execute ai-reporting-R1-data-aggregation
+Claude:   Got it. Start with /goals ai-reporting-R1-data-aggregation
 
-You:      /execute ai-reporting-R1-data-aggregation
-          [delegation preview → go → executes → R-1 marked Done]
+You:      /goals ai-reporting-R1-data-aggregation
+          [task breakdown → go → goal file + issues created]
+          /work-issue
+          [loops tasks → PRs open → R-1 awaiting review]
 
-          /execute ai-reporting-R2-report-generation
-          [executes → R-2 marked Done]
+          /goals ai-reporting-R2-report-generation
+          /work-issue
+          [R-2 awaiting review]
 
-          /execute ai-reporting-R3-pdf-export &
-          /execute ai-reporting-R4-delivery-ui
-          [both run, both marked Done]
+          /goals ai-reporting-R3-pdf-export
+          /goals ai-reporting-R4-delivery-ui
+          [both scheduled, worked in separate sessions or worktrees]
 
-You:      /review
+You:      [merge the PRs in order]
+          /review
 ```

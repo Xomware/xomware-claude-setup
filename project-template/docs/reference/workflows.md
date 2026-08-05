@@ -13,18 +13,25 @@ New feature, unclear approach?
   └─→ Unfamiliar tech? → /research [topic] first
   └─→ /brainstorm [topic]
   └─→ /plan [chosen option]
-  └─→ /execute [feature]
+  └─→ /goals [feature]          — goal file + issues, gated
+  └─→ /work-issue [number]      — loops task → PR until blocked or done
   └─→ /review
 New feature, clear approach?
   └─→ /plan [feature]
-  └─→ /execute [feature]
+  └─→ Should this be tracked on XomBoard?
+       ├─ yes → /goals [feature] → /work-issue
+       └─ no  → /execute [feature]
   └─→ /review
+Want all of it in one session?
+  └─→ /cycle [feature]
+       Same four stages, same three gates, no re-typing between them.
 Large multi-feature effort (epic)?
   └─→ /brainstorm [epic topic]
   └─→ /plan [epic]
   └─→ /orchestrate [epic]
   └─→ /plan each sub-feature
-  └─→ /execute each sub-feature
+  └─→ /goals each sub-feature
+  └─→ /work-issue each
   └─→ /review
 ```
 
@@ -52,7 +59,8 @@ Everything lands in one folder. Plan requires `Ready` status before execution.
 /plan [epic]            →  docs/features/[epic]/PLAN.md (high-level only)
 /orchestrate [epic]     →  creates sub-feature folders
 /plan [each feature]    →  fills in sub-feature plans
-/execute [each feature] →  builds each with audit trail
+/goals [each feature]   →  goal file + issues per feature
+/work-issue             →  builds each, task by task, to open PRs
 /review
 ```
 

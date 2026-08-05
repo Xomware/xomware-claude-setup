@@ -17,13 +17,18 @@ your-project/
 │       ├── session-log.md     ← session history (gitignored)
 │       └── dirty-files        ← changed files buffer (gitignored)
 │
+├── GOALS.md                   ← index of goals in flight (from /goals)
+├── goals/
+│   ├── 2026-08-05-my-goal.md  ← phases, tasks, progress log
+│   └── ARCHIVE.md             ← completed goals (pruned by /end-session)
+│
 ├── docs/
 │   ├── features/              ← one folder per feature/initiative
 │   │   ├── my-feature/
 │   │   │   ├── RESEARCH.md    ← from /research (optional)
 │   │   │   ├── BRAINSTORM.md  ← from /brainstorm (optional)
-│   │   │   ├── PLAN.md        ← from /plan (required for /execute)
-│   │   │   └── EXECUTION_LOG.md ← from /execute (auto-generated)
+│   │   │   ├── PLAN.md        ← from /plan (required for /execute and /goals)
+│   │   │   └── EXECUTION_LOG.md ← from /execute (untracked path only)
 │   │   └── my-epic/
 │   │       └── PLAN.md        ← epic plan, then /orchestrate creates sub-folders
 │   │
@@ -36,6 +41,7 @@ your-project/
 │   │   ├── commands.md
 │   │   ├── agents.md
 │   │   ├── workflows.md
+│   │   ├── goal-file-format.md
 │   │   └── file-structure.md
 │   │
 │   ├── workflows/             ← how-to guides for the pipeline

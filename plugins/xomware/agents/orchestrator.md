@@ -77,7 +77,7 @@ Before executing any feature, run:
   /plan [epic]-R1-[name]    ← fills in steps, risks, agent assignments
   /plan [epic]-R2-[name]
   ...
-Set each to Status: Ready before running /execute.
+Set each to Status: Ready before running /goals.
 
 ### Dependency order:
 [R-1] (no deps)
@@ -88,15 +88,15 @@ Set each to Status: Ready before running /execute.
 ### Execution options (once plans are Ready):
 **A — Sequential**: R-1 → R-2 → R-3 → R-4
 **B — Parallel where possible**: R-1 → R-2 → (R-3 ∥ R-4)
-**C — Manual**: I'll /execute each myself when ready
+**C — Manual**: I'll /goals each myself when ready
 
 Which mode? (You can answer now or after fleshing out the plans)
 ```
 
 ### Step 4 — Wait
-Do not execute anything. Wait for the user to choose a mode and then follow up with `/execute` commands themselves, or to explicitly say "go" with a chosen mode.
+Do not execute anything. Wait for the user to choose a mode and then follow up with `/goals` commands themselves, or to explicitly say "go" with a chosen mode.
 
-If they choose A or B, tell them exactly which `/execute` command to run first.
+If they choose A or B, tell them exactly which `/goals` command to run first.
 
 ## Principles
 - Never execute — only plan and structure

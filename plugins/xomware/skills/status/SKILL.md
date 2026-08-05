@@ -1,8 +1,8 @@
 ---
 name: status
 description: >
-  Show the state of every feature in docs/features — status, which docs exist
-  (research, brainstorm, plan, execution log), and when each was last updated.
+  Show the state of every feature in docs/features and every goal in flight — status,
+  which docs exist, task progress, and when each was last updated.
 disable-model-invocation: true
 allowed-tools: Read Glob Bash(git log:*)
 ---
@@ -19,21 +19,27 @@ Show the current state of all features in this project.
    - **Status** (from `Status:` line — Draft, Ready, In Progress, Blocked, Done)
    - **Last modified** (from git or file timestamp)
 3. Display a table sorted by status (In Progress first, then Ready, Blocked, Draft, Done)
-4. For each feature folder, note which docs exist (RESEARCH, BRAINSTORM, PLAN, EXECUTION_LOG)
-5. If `docs/solutions/` exists, show a count per category
+4. For each feature folder, note which docs exist (RESEARCH, BRAINSTORM, PLAN)
+5. Read `GOALS.md`. For each active goal, open its goal file and count tasks by status
+6. If `docs/solutions/` exists, show a count per category
 
 ## Output Format
 
 ```
 ## Features
-| Status | Feature | Docs | Last Updated |
-|--------|---------|------|-------------|
-| 🔵 In Progress | feature-name | R B P E | 2026-03-09 |
-| 🟢 Ready | other-feature | B P | 2026-03-08 |
-| ⚪ Draft | idea | P | 2026-03-07 |
-| ✅ Done | completed-thing | R B P E | 2026-03-05 |
+| Status      | Feature          | Docs  | Last Updated |
+|-------------|------------------|-------|--------------|
+| In Progress | feature-name     | R B P | 2026-03-09   |
+| Ready       | other-feature    | B P   | 2026-03-08   |
+| Draft       | idea             | P     | 2026-03-07   |
+| Done        | completed-thing  | R B P | 2026-03-05   |
 
-Docs key: R=Research, B=Brainstorm, P=Plan, E=Execution Log
+Docs key: R=Research, B=Brainstorm, P=Plan
+
+## Goals in flight
+| Goal          | Tracking | Tasks                       | Status    |
+|---------------|----------|-----------------------------|-----------|
+| Coverage calc | #142     | 2 done, 1 in review, 3 todo | in progress |
 
 ## Solutions (N total)
 - auth: 3 docs
@@ -41,5 +47,6 @@ Docs key: R=Research, B=Brainstorm, P=Plan, E=Execution Log
 ```
 
 If no feature docs exist, say so and suggest `/brainstorm` or `/plan` to get started.
+If features exist but no goals are in flight, suggest `/goals [feature]` for anything Ready.
 
 $ARGUMENTS

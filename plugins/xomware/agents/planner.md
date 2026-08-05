@@ -62,7 +62,9 @@ Use this exact structure:
 Tell the user:
 1. Where the file was saved
 2. Which agents/skills are queued for execution
-3. That they can run `/execute [feature-name]` to start with a delegation preview
+3. That they should flip Status to `Ready`, then either:
+   - `/goals [feature-name]` — tracked: goal file, issues, board, PRs
+   - `/execute [feature-name]` — untracked: straight to work, stays local
 
 ## Principles
 - Steps must be specific enough to execute without guessing

@@ -10,7 +10,10 @@ Quick reference for all available slash commands. Run any command by typing it i
 | `/research [topic]` | Investigate a technology before brainstorming | Unfamiliar library, API, or architecture question |
 | `/brainstorm [topic]` | Explore options, converge to 2-3 with tradeoffs | Start of a new feature when approach is unclear |
 | `/plan [topic]` | Write a structured implementation plan | After brainstorm, or when approach is already clear |
-| `/execute [feature]` | Act on a plan — shows preview, waits for approval | When plan status is Ready |
+| `/execute [feature]` | Act on a plan locally — delegation preview, no GitHub | Plan is Ready and the work doesn't warrant issues |
+| `/goals [topic]` | Plan → durable goal file + linked GitHub issues on XomBoard | Plan is Ready and the work should be tracked |
+| `/work-issue [n]` | Issue → branch → tests → PR → CI; loops task-to-task in goal mode | To build what `/goals` scheduled |
+| `/cycle [feature]` | All four stages in one session, with a gate between each | Starting a feature from scratch in one sitting |
 | `/orchestrate [epic]` | Break epic plan into sub-feature folders | Multi-feature work with dependencies |
 
 ## Code Quality Commands
@@ -27,6 +30,7 @@ Quick reference for all available slash commands. Run any command by typing it i
 | Command | What it does | When to use |
 |---------|-------------|-------------|
 | `/compound [pattern]` | Capture a pattern into a reusable solution doc | After discovering a recurring issue or tricky pattern |
+| `/map [dir]` | Generate per-directory README maps; `--check` reports drift | When agents keep hunting for the same code |
 | `/status` | Dashboard of all features and their status | Anytime — see what's in flight |
 | `/catchup` | Resume context from last session | Start of session |
 | `/catchup` | Reconcile auto memory against git and summarize where you left off | Picking a project back up |
@@ -47,10 +51,10 @@ Is the approach unclear?
   → /brainstorm (or /research first if tech is unfamiliar)
 
 Do you know what to build?
-  → /plan → /execute
+  → /plan → /goals → /work-issue
 
 Is it a large multi-feature effort?
-  → /plan [epic] → /orchestrate → /plan each → /execute each
+  → /plan [epic] → /orchestrate → /plan each → /goals each → /work-issue each
 
 Picking a project back up?
   → /catchup
