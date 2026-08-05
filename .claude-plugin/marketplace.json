@@ -10,7 +10,7 @@
       "name": "xomware",
       "source": "./plugins/xomware",
       "description": "Xomware engineering standards, workflow commands, and specialist agents for Claude Code.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "workflow",
       "tags": ["angular", "swift", "python", "lambda", "terraform", "aws"],
       "author": {
