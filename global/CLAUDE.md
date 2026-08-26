@@ -53,6 +53,9 @@
 **Single feature, untracked**: `/brainstorm` → `/plan` → `/execute` → `/review` — no issues, no board
 **Single feature, one sitting**: `/cycle [feature]` — the tracked path, same gates, no re-typing
 **Epic (multi-feature)**: `/brainstorm` → `/plan [epic]` → `/orchestrate` → `/plan` each stub → `/goals` each → `/work-issue` each
+**Understand unfamiliar code**: `/walkthrough [path]` — guided tour, flags friction as you go
+**Strip bloat from existing code**: `/decruft [path]` — reports what `code-style.md` bans, applies on approval
+**Document a repo**: `/repo-docs` — writes `docs/architecture.md` + `docs/runbook.md` with staleness globs
 
 Full walkthroughs: `@docs/workflows/feature-workflow.md`, `@docs/workflows/epic-workflow.md`, `@docs/workflows/research-workflow.md`
 
@@ -64,6 +67,11 @@ Rules:
 - Never execute a plan with status `Draft` — flip to `Ready` first
 - Use `/compound` to capture patterns worth preserving across sessions
 - Run `/catchup` when picking a project back up after time away
+- Run `/walkthrough` before working in a repo you don't know — `/research` is for external
+  tech, `/walkthrough` is for our own code. It teaches one subsystem and is disposable;
+  `/repo-docs` writes the durable repo-level reference
+- Never write a doc fact you can't point at a file for — `**unknown**` is the correct
+  output. A confidently wrong architecture doc gets trusted; a missing one just gets written
 
 ## Pipeline Discipline — No Shortcuts
 
