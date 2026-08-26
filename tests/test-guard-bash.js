@@ -8,14 +8,36 @@
 // base-branch rule. A repo wanting a different target sets base_branch in its
 // Project Config, which /pr reads.
 const { spawnSync } = require("child_process");
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
 
 const HOOK = process.argv[2];
-const CWD = process.argv[3] || process.cwd();
 
 if (!HOOK) {
   console.error("usage: node tests/test-guard-bash.js <path-to-guard-bash.js> [cwd]");
   process.exit(2);
 }
+
+// The PR-size check diffs the cwd against its base branch, so running these
+// cases in this repo makes the result depend on how big the current branch
+// happens to be — the suite passed before this branch grew past 400 lines and
+// failed after, testing nothing but the working tree. Every case runs against a
+// throwaway repo with an empty diff instead.
+function cleanRepo() {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "guard-bash-"));
+  const git = (...args) =>
+    spawnSync("git", args, { cwd: dir, encoding: "utf8", stdio: "ignore" });
+  git("init", "-q", "-b", "main");
+  git("config", "user.email", "test@example.com");
+  git("config", "user.name", "test");
+  fs.writeFileSync(path.join(dir, "README.md"), "# fixture\n");
+  git("add", "-A");
+  git("commit", "-qm", "init");
+  return dir;
+}
+
+const CWD = process.argv[3] || cleanRepo();
 
 // Assembled, never written whole. This file gets created by shell heredocs, and
 // a literal fork bomb or reformat command in the command line trips the very
