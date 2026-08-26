@@ -1,5 +1,5 @@
 {
-  "$comment": "Hooks are NOT defined here. They ship with the xomware plugin at plugins/xomware/hooks/hooks.json. Declaring them in both places fires every hook twice.",
+  "$comment": "Hooks are NOT defined here. They ship with the xomware plugin at plugins/xomware/hooks/hooks.json. Declaring them in both places fires every hook twice. Rules are not here either — they live in global/rules/ and are symlinked into ~/.claude/rules/ by xom-install-claude-setup.",
   "permissions": {
     "deny": [
       "Bash(rm -rf *)",
@@ -18,6 +18,14 @@
   "enabledPlugins": {
     "xomware@xomware": true
   },
-  "model": "opus",
-  "subagentModel": "sonnet"
+  "model": "opus[1m]",
+  "subagentModel": "sonnet",
+  "alwaysThinkingEnabled": true,
+  "showThinkingSummaries": true,
+  "outputStyle": "Concise",
+  "includeCoAuthoredBy": false,
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  }
 }

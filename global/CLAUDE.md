@@ -31,6 +31,10 @@
 - Early returns over nested conditionals
 - Explicit error handling — no silent failures
 - No commented-out code in commits
+- How much code to write, and how much of it should be comments, lives in
+  `~/.claude/rules/code-style.md`, which always loads — rules and worked examples
+  both. Short version: write the version a competent engineer writes when nobody
+  is watching.
 
 ## Response Defaults
 - Short bullets for lists, prose for explanations
@@ -38,6 +42,9 @@
 - Call out assumptions and tradeoffs
 - If something seems off, say so
 - **All doc output as `.md` files** — never paste long docs into chat, write to file
+- Tone and length for chat, GitHub, commits and code comments live in
+  `~/.claude/rules/writing-style.md`, which always loads. "No fluff" as a bullet
+  here never bound anything — the rule names the specific shapes to delete.
 
 ## Standard Workflow
 
@@ -46,6 +53,9 @@
 **Single feature, untracked**: `/brainstorm` → `/plan` → `/execute` → `/review` — no issues, no board
 **Single feature, one sitting**: `/cycle [feature]` — the tracked path, same gates, no re-typing
 **Epic (multi-feature)**: `/brainstorm` → `/plan [epic]` → `/orchestrate` → `/plan` each stub → `/goals` each → `/work-issue` each
+**Understand unfamiliar code**: `/walkthrough [path]` — guided tour, flags friction as you go
+**Strip bloat from existing code**: `/decruft [path]` — reports what `code-style.md` bans, applies on approval
+**Document a repo**: `/repo-docs` — writes `docs/architecture.md` + `docs/runbook.md` with staleness globs
 
 Full walkthroughs: `@docs/workflows/feature-workflow.md`, `@docs/workflows/epic-workflow.md`, `@docs/workflows/research-workflow.md`
 
@@ -57,6 +67,11 @@ Rules:
 - Never execute a plan with status `Draft` — flip to `Ready` first
 - Use `/compound` to capture patterns worth preserving across sessions
 - Run `/catchup` when picking a project back up after time away
+- Run `/walkthrough` before working in a repo you don't know — `/research` is for external
+  tech, `/walkthrough` is for our own code. It teaches one subsystem and is disposable;
+  `/repo-docs` writes the durable repo-level reference
+- Never write a doc fact you can't point at a file for — `**unknown**` is the correct
+  output. A confidently wrong architecture doc gets trusted; a missing one just gets written
 
 ## Pipeline Discipline — No Shortcuts
 
@@ -82,26 +97,34 @@ Rules:
 - Run `/memory` to audit or edit what has been saved
 - Git is the source of truth. When a memory contradicts the repo, trust the repo
 
-## Git Commit Rules
-- Do NOT add "Co-Authored-By" lines to commit messages — ever, in any project
-- Do NOT tag issue numbers (`#N`) in commits unless the commit is directly related to that issue
-- Branch naming convention: `<type>/<issue-number>-<short-desc>` (e.g. `feature/42-coverage-calc`)
-- Commit messages start with issue number: `#42 add coverage calculation`
-- PRs must use `Closes #N` in description — branch name alone does NOT auto-link
+## Rules loaded separately
 
-## Issue Discipline
-- Post completion comments on issues with a summary of what was done
-- Issues are what `Closes #N` links to and what makes `/work-issue` resumable — keep them
-- XomBoard is off by default. Set `pm_tool: github-projects` in a repo's Project Config to
-  opt that repo back in
+`~/.claude/rules/` carries the detail. A rule with no `paths:` frontmatter loads every
+session; one with `paths:` loads only when Claude touches a matching file. Standards
+that must always hold belong there, never in a skill — a skill that must be invoked is
+a skill that never runs. That is why the four `*-standards` skills each have a thin
+always-on rule beside them now.
+
+Always load: `code-style.md`, `writing-style.md`, `pr-sizing.md`, `root-cause.md`,
+`git-discipline.md`, and `constitution.md` + `constitution-local.md` (Kenn's Clanker
+Constitution, vendored verbatim, plus where we differ from it).
+
+Path-scoped: `frontend.md`, `backend.md`, `ios.md`, `infra.md`, `verification.md` (UI
+and templates), `config-hygiene.md` (Claude config itself).
+
+Precedence when they disagree: this file and the project's `CLAUDE.md` beat
+`constitution.md`. See `constitution-local.md` — in particular its §2 note, where
+"Plan before code — always" above wins over the constitution's advice not to impose
+planning ceremony. Use `/fix` for the small stuff instead.
+
+Rules cannot ship in a plugin. `xom-install-claude-setup` symlinks them from
+`global/rules/` into `~/.claude/rules/`, so editing one here is live next session.
 
 ## Lessons
-- Do NOT put project-specific rules in `~/.claude/CLAUDE.md`. Move them to the project's `.claude/CLAUDE.md` or `.claude/rules/`.
-- Do NOT let project `CLAUDE.md` exceed 200 lines. Split path-specific content to `.claude/rules/` files with `paths:` frontmatter.
-- Do NOT restate linter/formatter rules in CLAUDE.md. Reference the config file instead.
-- Do NOT write long explanatory paragraphs in CLAUDE.md. Use short imperative bullets.
 - Do NOT make changes to multiple files without presenting the full plan first.
 - Do NOT update `CLAUDE.md` without reading it first and checking the line count after.
 - Do NOT create speculative commands, skills, or agents. Build them when the need is confirmed.
-- Do NOT put ephemeral state (current focus, branch lists, deploy checklists) in CLAUDE.md. Use memory files instead.
 - Do NOT duplicate CLAUDE.md content in MEMORY.md. Memory is for non-obvious context; CLAUDE.md is for rules.
+
+Everything else about where config belongs is in `~/.claude/rules/config-hygiene.md`,
+which loads whenever Claude config is being edited.
