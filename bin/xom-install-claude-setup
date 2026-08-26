@@ -8,6 +8,9 @@
 #   ~/.claude/CLAUDE.md      global instructions
 #   ~/.claude/settings.json  permissions.deny and model defaults
 #     (plugin settings.json supports only `agent` and `subagentStatusLine`)
+#   ~/.claude/rules/         always-loaded and path-scoped standards
+#     (rules load from project .claude/rules/ and user ~/.claude/rules/ only —
+#      there is no plugin rules directory)
 #
 # It also clears out copies left by the pre-plugin installer, which would
 # otherwise shadow the plugin's agents and duplicate its skills.
@@ -28,8 +31,8 @@ usage() {
   cat <<'USAGE'
 Usage: xom-install-claude-setup [--force] [--dry-run]
 
-Installs the Xomware global CLAUDE.md and settings.json, and prints the
-commands to register the plugin marketplace.
+Installs the Xomware global CLAUDE.md, settings.json and rules/, and prints
+the commands to register the plugin marketplace.
 
 Options:
   --force    Overwrite existing files (backs them up first)
@@ -54,6 +57,69 @@ backup_path() {
   local dst="$BACKUP_DIR/$rel"
   mkdir -p "$(dirname "$dst")"
   cp -R "$src" "$dst"
+}
+
+# Rules are symlinked, not copied, so editing global/rules/<x>.md in this repo
+# takes effect in the next session with no reinstall. Per-file rather than a
+# directory symlink: retiring a rule leaves one dangling link to prune instead
+# of silently changing what the whole directory resolves to.
+link_rules() {
+  local src_dir="$SOURCE_DIR/rules" dst_dir="$CLAUDE_DIR/rules"
+  [[ -d "$src_dir" ]] || return 0
+
+  if [[ "$DRY_RUN" == "false" ]]; then
+    mkdir -p "$dst_dir"
+  fi
+
+  local f name dst
+  for f in "$src_dir"/*.md; do
+    [[ -f "$f" ]] || continue
+    name="$(basename "$f")"
+    dst="$dst_dir/$name"
+
+    if [[ -L "$dst" && "$(readlink "$dst")" == "$f" ]]; then
+      continue
+    fi
+
+    if [[ "$DRY_RUN" == "true" ]]; then
+      if [[ -e "$dst" && ! -L "$dst" ]]; then
+        [[ "$FORCE" == "true" ]] && log "WOULD REPLACE with link (backup first): $dst" \
+                                 || log "SKIP (real file exists, use --force): $dst"
+      else
+        log "WOULD LINK: $dst"
+      fi
+      continue
+    fi
+
+    if [[ -e "$dst" && ! -L "$dst" ]]; then
+      if [[ "$FORCE" == "false" ]]; then
+        log "SKIP (real file exists, use --force): $dst"
+        continue
+      fi
+      backup_path "$dst"
+      rm -rf "$dst"
+    else
+      rm -f "$dst"
+    fi
+
+    ln -s "$f" "$dst"
+    log "LINKED: $dst"
+  done
+
+  # A link pointing into this repo at a file that no longer exists is a retired
+  # rule. Nothing else is touched, so hand-written rules are never at risk.
+  for dst in "$dst_dir"/*.md; do
+    [[ -L "$dst" ]] || continue
+    local target; target="$(readlink "$dst")"
+    case "$target" in "$REPO_DIR"/*) ;; *) continue ;; esac
+    [[ -e "$target" ]] && continue
+    if [[ "$DRY_RUN" == "true" ]]; then
+      log "WOULD PRUNE (retired rule): $dst"
+    else
+      rm -f "$dst"
+      log "PRUNED (retired rule): $(basename "$dst")"
+    fi
+  done
 }
 
 copy_file() {
@@ -110,6 +176,8 @@ fi
 [[ "$DRY_RUN" == "false" ]] && mkdir -p "$CLAUDE_DIR"
 
 copy_file "$SOURCE_DIR/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
+
+link_rules
 
 # settings.json is MERGED, never replaced. It holds personal keys the repo knows
 # nothing about — enabled plugins, tui mode, notification preferences — and a
