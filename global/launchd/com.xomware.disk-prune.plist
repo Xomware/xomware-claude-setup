@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.xomware.disk-prune</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/dom/Code/xomware-claude-setup/bin/xom-disk-prune</string>
+    <string>--apply</string>
+  </array>
+
+  <!-- Sunday 10am. Weekly is enough: DerivedData is the only thing that grows
+       fast, and a build session regrows it in minutes anyway. -->
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Weekday</key><integer>0</integer>
+    <key>Hour</key><integer>10</integer>
+    <key>Minute</key><integer>0</integer>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>/Users/dom/Library/Logs/xom-disk-prune.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/dom/Library/Logs/xom-disk-prune.log</string>
+
+  <key>RunAtLoad</key>
+  <false/>
+</dict>
+</plist>
