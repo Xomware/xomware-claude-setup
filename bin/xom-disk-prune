@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# xom-disk-prune
+# Reclaims the caches that regrow on their own: Xcode DerivedData, unavailable
+# simulators, and node_modules in repos you have not touched lately.
+#
+# Dry run by default. Pass --apply to actually delete.
+set -euo pipefail
+
+APPLY=0
+STALE_DAYS=30
+[[ "${1:-}" == "--apply" ]] && APPLY=1
+
+reclaimed=0
+
+# du -sk on a missing path is an error, not zero.
+size_kb() {
+  [[ -e "$1" ]] || { echo 0; return; }
+  du -sk "$1" 2>/dev/null | awk '{print $1}'
+}
+
+drop() {
+  local path="$1" label="$2" kb
+  kb=$(size_kb "$path")
+  [[ "$kb" -eq 0 ]] && return
+  reclaimed=$((reclaimed + kb))
+  if [[ "$APPLY" -eq 1 ]]; then
+    rm -rf "$path"
+    printf '%8.1f GB  removed  %s\n' "$(echo "$kb/1048576" | bc -l)" "$label"
+  else
+    printf '%8.1f GB  would remove  %s\n' "$(echo "$kb/1048576" | bc -l)" "$label"
+  fi
+}
+
+drop "$HOME/Library/Developer/Xcode/DerivedData" "Xcode DerivedData"
+
+# Regenerated on next device connect. Only the symbols, not the archives.
+drop "$HOME/Library/Developer/Xcode/iOS DeviceSupport" "iOS DeviceSupport"
+
+# A repo's last COMMIT is the signal, not file mtime -- node_modules itself
+# gets touched by tooling long after you stop working in a repo.
+while IFS= read -r modules; do
+  repo=$(dirname "$modules")
+  last_commit=$(git -C "$repo" log -1 --format=%ct 2>/dev/null || echo 0)
+  [[ "$last_commit" -eq 0 ]] && continue
+  age_days=$(( ( $(date +%s) - last_commit ) / 86400 ))
+  [[ "$age_days" -lt "$STALE_DAYS" ]] && continue
+  drop "$modules" "node_modules ($(basename "$repo"), ${age_days}d idle)"
+done < <(find "$HOME/Code" -maxdepth 3 -name node_modules -type d -prune 2>/dev/null)
+
+if [[ "$APPLY" -eq 1 ]]; then
+  xcrun simctl delete unavailable >/dev/null 2>&1 || true
+fi
+
+printf '\n%.1f GB total%s\n' "$(echo "$reclaimed/1048576" | bc -l)" \
+  "$([[ "$APPLY" -eq 1 ]] && echo ' reclaimed' || echo ' reclaimable -- run with --apply')"
